@@ -90,7 +90,7 @@ A fully functional Java 25 Quarkus-based Loan microservice that:
 - **Performance**: Not adding indexes or query optimizations
 - **Transactions**: Not adding MongoDB transaction support for atomic operations
 - **Error Handling**: Not adding comprehensive error handling beyond what exists
-- **Testing**: Not adding unit/integration tests beyond basic verification
+- **Integration Tests**: Not adding integration tests with real MongoDB (unit tests with mocks are in scope)
 - **API Changes**: Not modifying any endpoint paths, methods, or response formats
 
 ## Implementation Approach
@@ -102,6 +102,51 @@ Create a new `loan-java/` directory with a Quarkus application using:
 - quarkus-mongodb-panache for MongoDB operations
 - quarkus-grpc for gRPC support
 - quarkus-rest (RESTEasy Reactive) for HTTP endpoints
+
+---
+
+## Testing Strategy
+
+### Framework and Tools
+| Tool | Purpose |
+|------|---------|
+| JUnit 5 | Test framework (via `quarkus-junit5`) |
+| Mockito | Mocking MongoDB clients and external dependencies |
+| REST Assured | HTTP endpoint testing |
+| JaCoCo | Code coverage measurement and reporting |
+
+### Coverage Requirements
+- **Minimum Line Coverage**: 90%
+- **Enforcement**: JaCoCo Gradle plugin with `violationRules` to fail build if coverage drops below threshold
+- **Reporting**: HTML and XML reports generated in `build/reports/jacoco/`
+
+### Testing Approach
+1. **Unit Tests Only**: All tests use mocks for external dependencies (MongoDB, etc.)
+2. **No Integration Tests**: Tests do not connect to real databases or external services
+3. **Phase-Based Testing**: Each coding phase is followed by a dedicated testing phase
+4. **Incremental Coverage**: Each testing phase must achieve 90% coverage for the code introduced in its corresponding coding phase
+
+### Test Directory Structure
+```
+loan-java/src/test/java/com/martianbank/loan/
+├── model/           # DTO/Document model tests
+├── repository/      # Repository tests with mocked MongoClient
+├── service/         # Business logic tests with mocked repositories
+├── resource/        # REST endpoint tests
+└── grpc/            # gRPC service tests
+```
+
+### Running Tests
+```bash
+# Run all tests with coverage
+cd loan-java && ./gradlew test jacocoTestReport
+
+# Check coverage threshold (fails if below 90%)
+cd loan-java && ./gradlew jacocoTestCoverageVerification
+
+# View coverage report
+open loan-java/build/reports/jacoco/test/html/index.html
+```
 
 ---
 
@@ -147,6 +192,7 @@ loan-java/
 plugins {
     java
     id("io.quarkus") version "3.17.5"
+    jacoco
 }
 
 repositories {
@@ -180,6 +226,8 @@ dependencies {
     // Testing
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")
+    testImplementation("org.mockito:mockito-core:5.14.2")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.14.2")
 }
 
 java {
@@ -190,6 +238,25 @@ java {
 
 tasks.withType<Test> {
     systemProperty("java.util.logging.manager", "org.jboss.logmanager.LogManager")
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.90".toBigDecimal()
+            }
+        }
+    }
 }
 
 tasks.withType<JavaCompile> {
@@ -348,6 +415,92 @@ public class LoanApplication {
 - [ ] Project structure matches the specified layout
 - [ ] All configuration files are in place
 - [ ] No compilation errors in IDE
+
+**Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 1.5 for testing.
+
+---
+
+## Phase 1.5: Project Setup Tests
+
+### Overview
+Create unit tests for the project setup to verify the application context loads correctly and basic configuration is properly applied. This phase establishes the test infrastructure.
+
+### Changes Required:
+
+#### 1. Application Context Test
+**File**: `loan-java/src/test/java/com/martianbank/loan/LoanApplicationTest.java`
+
+```java
+package com.martianbank.loan;
+
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@QuarkusTest
+class LoanApplicationTest {
+
+    @ConfigProperty(name = "quarkus.application.name")
+    String applicationName;
+
+    @ConfigProperty(name = "quarkus.http.port")
+    int httpPort;
+
+    @Test
+    void applicationContextLoads() {
+        // If we get here, the application context loaded successfully
+        assertTrue(true, "Application context should load");
+    }
+
+    @Test
+    void applicationNameIsConfigured() {
+        assertEquals("loan-service", applicationName);
+    }
+
+    @Test
+    void httpPortIsConfigured() {
+        assertEquals(50053, httpPort);
+    }
+}
+```
+
+#### 2. Test Resources Configuration
+**File**: `loan-java/src/test/resources/application.properties`
+
+```properties
+# Test configuration - override production settings
+quarkus.application.name=loan-service
+
+# Use test port to avoid conflicts
+quarkus.http.port=50053
+quarkus.http.test-port=8081
+
+# Mock MongoDB - disable actual connection for unit tests
+quarkus.mongodb.connection-string=mongodb://localhost:27017
+quarkus.mongodb.database=bank
+
+# Disable gRPC server in tests (will be tested separately)
+quarkus.grpc.server.use-separate-server=false
+
+# Reduce logging noise in tests
+quarkus.log.level=WARN
+quarkus.log.category."com.martianbank".level=DEBUG
+```
+
+### Success Criteria:
+
+#### Automated Verification:
+- [ ] Tests pass: `cd loan-java && ./gradlew test`
+- [ ] Coverage report generated: `cd loan-java && ./gradlew jacocoTestReport`
+- [ ] Phase 1 code coverage ≥ 90%: `cd loan-java && ./gradlew jacocoTestCoverageVerification`
+
+#### Manual Verification:
+- [ ] Test report viewable at `loan-java/build/reports/tests/test/index.html`
+- [ ] Coverage report viewable at `loan-java/build/reports/jacoco/test/html/index.html`
+- [ ] LoanApplication class shows ≥ 90% line coverage
 
 **Implementation Note**: After completing this phase and all automated verification passes, pause here for manual confirmation before proceeding to Phase 2.
 
@@ -808,6 +961,561 @@ public class LoansRepository {
 - [ ] JSON annotations produce correct field names in responses
 - [ ] Repository query logic matches Python implementation exactly
 
+**Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 2.5 for testing.
+
+---
+
+## Phase 2.5: Model and Repository Tests
+
+### Overview
+Create unit tests for DTOs, document models, and repository classes. Repository tests use mocked MongoDB clients to verify query construction and data mapping.
+
+### Changes Required:
+
+#### 1. LoanRequestDto Test
+**File**: `loan-java/src/test/java/com/martianbank/loan/model/LoanRequestDtoTest.java`
+
+```java
+package com.martianbank.loan.model;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class LoanRequestDtoTest {
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Test
+    void serializesToJsonWithCorrectFieldNames() throws Exception {
+        LoanRequestDto dto = new LoanRequestDto();
+        dto.setName("John Doe");
+        dto.setEmail("john@test.com");
+        dto.setAccountType("savings");
+        dto.setAccountNumber("12345");
+        dto.setGovtIdType("passport");
+        dto.setGovtIdNumber("ABC123");
+        dto.setLoanType("personal");
+        dto.setLoanAmount(5000.0);
+        dto.setInterestRate(5.5);
+        dto.setTimePeriod("12 months");
+
+        String json = objectMapper.writeValueAsString(dto);
+
+        assertTrue(json.contains("\"name\":\"John Doe\""));
+        assertTrue(json.contains("\"email\":\"john@test.com\""));
+        assertTrue(json.contains("\"account_type\":\"savings\""));
+        assertTrue(json.contains("\"account_number\":\"12345\""));
+        assertTrue(json.contains("\"govt_id_type\":\"passport\""));
+        assertTrue(json.contains("\"govt_id_number\":\"ABC123\""));
+        assertTrue(json.contains("\"loan_type\":\"personal\""));
+        assertTrue(json.contains("\"loan_amount\":5000.0"));
+        assertTrue(json.contains("\"interest_rate\":5.5"));
+        assertTrue(json.contains("\"time_period\":\"12 months\""));
+    }
+
+    @Test
+    void deserializesFromJsonWithSnakeCaseFields() throws Exception {
+        String json = """
+            {
+                "name": "Jane Doe",
+                "email": "jane@test.com",
+                "account_type": "checking",
+                "account_number": "67890",
+                "govt_id_type": "license",
+                "govt_id_number": "XYZ789",
+                "loan_type": "mortgage",
+                "loan_amount": 10000.0,
+                "interest_rate": 4.5,
+                "time_period": "24 months"
+            }
+            """;
+
+        LoanRequestDto dto = objectMapper.readValue(json, LoanRequestDto.class);
+
+        assertEquals("Jane Doe", dto.getName());
+        assertEquals("jane@test.com", dto.getEmail());
+        assertEquals("checking", dto.getAccountType());
+        assertEquals("67890", dto.getAccountNumber());
+        assertEquals("license", dto.getGovtIdType());
+        assertEquals("XYZ789", dto.getGovtIdNumber());
+        assertEquals("mortgage", dto.getLoanType());
+        assertEquals(10000.0, dto.getLoanAmount());
+        assertEquals(4.5, dto.getInterestRate());
+        assertEquals("24 months", dto.getTimePeriod());
+    }
+
+    @Test
+    void gettersAndSettersWorkCorrectly() {
+        LoanRequestDto dto = new LoanRequestDto();
+
+        dto.setName("Test Name");
+        assertEquals("Test Name", dto.getName());
+
+        dto.setEmail("test@email.com");
+        assertEquals("test@email.com", dto.getEmail());
+
+        dto.setLoanAmount(1000.50);
+        assertEquals(1000.50, dto.getLoanAmount());
+    }
+}
+```
+
+#### 2. LoanResponseDto Test
+**File**: `loan-java/src/test/java/com/martianbank/loan/model/LoanResponseDtoTest.java`
+
+```java
+package com.martianbank.loan.model;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class LoanResponseDtoTest {
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Test
+    void constructorSetsFields() {
+        LoanResponseDto dto = new LoanResponseDto(true, "Loan Approved");
+
+        assertTrue(dto.isApproved());
+        assertEquals("Loan Approved", dto.getMessage());
+    }
+
+    @Test
+    void defaultConstructorCreatesEmptyObject() {
+        LoanResponseDto dto = new LoanResponseDto();
+
+        assertFalse(dto.isApproved());
+        assertNull(dto.getMessage());
+    }
+
+    @Test
+    void serializesToJsonWithCorrectFieldNames() throws Exception {
+        LoanResponseDto dto = new LoanResponseDto(true, "Success");
+
+        String json = objectMapper.writeValueAsString(dto);
+
+        assertTrue(json.contains("\"approved\":true"));
+        assertTrue(json.contains("\"message\":\"Success\""));
+    }
+
+    @Test
+    void deserializesFromJson() throws Exception {
+        String json = "{\"approved\":false,\"message\":\"Loan Rejected\"}";
+
+        LoanResponseDto dto = objectMapper.readValue(json, LoanResponseDto.class);
+
+        assertFalse(dto.isApproved());
+        assertEquals("Loan Rejected", dto.getMessage());
+    }
+}
+```
+
+#### 3. LoanHistoryRequestDto Test
+**File**: `loan-java/src/test/java/com/martianbank/loan/model/LoanHistoryRequestDtoTest.java`
+
+```java
+package com.martianbank.loan.model;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class LoanHistoryRequestDtoTest {
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Test
+    void serializesToJson() throws Exception {
+        LoanHistoryRequestDto dto = new LoanHistoryRequestDto();
+        dto.setEmail("test@example.com");
+
+        String json = objectMapper.writeValueAsString(dto);
+
+        assertTrue(json.contains("\"email\":\"test@example.com\""));
+    }
+
+    @Test
+    void deserializesFromJson() throws Exception {
+        String json = "{\"email\":\"user@test.com\"}";
+
+        LoanHistoryRequestDto dto = objectMapper.readValue(json, LoanHistoryRequestDto.class);
+
+        assertEquals("user@test.com", dto.getEmail());
+    }
+
+    @Test
+    void getterAndSetterWork() {
+        LoanHistoryRequestDto dto = new LoanHistoryRequestDto();
+        dto.setEmail("new@email.com");
+
+        assertEquals("new@email.com", dto.getEmail());
+    }
+}
+```
+
+#### 4. LoanDocument Test
+**File**: `loan-java/src/test/java/com/martianbank/loan/model/LoanDocumentTest.java`
+
+```java
+package com.martianbank.loan.model;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class LoanDocumentTest {
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Test
+    void timestampReturnsStringFormat() {
+        LoanDocument doc = new LoanDocument();
+        LocalDateTime timestamp = LocalDateTime.of(2024, 1, 15, 10, 30, 0);
+        doc.setTimestampDate(timestamp);
+
+        assertEquals("2024-01-15T10:30", doc.getTimestamp());
+    }
+
+    @Test
+    void timestampReturnsNullWhenNotSet() {
+        LoanDocument doc = new LoanDocument();
+
+        assertNull(doc.getTimestamp());
+    }
+
+    @Test
+    void allFieldsSerializeCorrectly() throws Exception {
+        LoanDocument doc = new LoanDocument();
+        doc.setName("John");
+        doc.setEmail("john@test.com");
+        doc.setAccountType("savings");
+        doc.setAccountNumber("12345");
+        doc.setGovtIdType("passport");
+        doc.setGovtIdNumber("ABC123");
+        doc.setLoanType("personal");
+        doc.setLoanAmount(5000.0);
+        doc.setInterestRate(5.5);
+        doc.setTimePeriod("12 months");
+        doc.setStatus("Approved");
+        doc.setTimestampDate(LocalDateTime.of(2024, 1, 15, 10, 30, 0));
+
+        String json = objectMapper.writeValueAsString(doc);
+
+        assertTrue(json.contains("\"account_type\":\"savings\""));
+        assertTrue(json.contains("\"account_number\":\"12345\""));
+        assertTrue(json.contains("\"status\":\"Approved\""));
+        assertTrue(json.contains("\"timestamp\":\"2024-01-15T10:30\""));
+    }
+}
+```
+
+#### 5. AccountDocument Test
+**File**: `loan-java/src/test/java/com/martianbank/loan/model/AccountDocumentTest.java`
+
+```java
+package com.martianbank.loan.model;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class AccountDocumentTest {
+
+    @Test
+    void gettersAndSettersWorkCorrectly() {
+        AccountDocument doc = new AccountDocument();
+
+        doc.setAccountNumber("ACC123");
+        doc.setEmailId("user@test.com");
+        doc.setBalance(1000.50);
+        doc.setName("Test User");
+        doc.setAccountType("savings");
+
+        assertEquals("ACC123", doc.getAccountNumber());
+        assertEquals("user@test.com", doc.getEmailId());
+        assertEquals(1000.50, doc.getBalance());
+        assertEquals("Test User", doc.getName());
+        assertEquals("savings", doc.getAccountType());
+    }
+
+    @Test
+    void defaultBalanceIsZero() {
+        AccountDocument doc = new AccountDocument();
+        doc.setBalance(0.0);
+
+        assertEquals(0.0, doc.getBalance());
+    }
+}
+```
+
+#### 6. AccountsRepository Test
+**File**: `loan-java/src/test/java/com/martianbank/loan/repository/AccountsRepositoryTest.java`
+
+```java
+package com.martianbank.loan.repository;
+
+import com.martianbank.loan.model.AccountDocument;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
+import org.bson.Document;
+import org.bson.conversions.Bson;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Arrays;
+import java.util.Iterator;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class AccountsRepositoryTest {
+
+    @Mock
+    MongoClient mongoClient;
+
+    @Mock
+    MongoDatabase mongoDatabase;
+
+    @Mock
+    MongoCollection<Document> mongoCollection;
+
+    @Mock
+    FindIterable<Document> findIterable;
+
+    @InjectMocks
+    AccountsRepository accountsRepository;
+
+    @BeforeEach
+    void setUp() {
+        when(mongoClient.getDatabase("bank")).thenReturn(mongoDatabase);
+        when(mongoDatabase.getCollection("accounts")).thenReturn(mongoCollection);
+    }
+
+    @Test
+    void countByEmailIdAndAccountNumber_returnsCount() {
+        when(mongoCollection.countDocuments(any(Bson.class))).thenReturn(1L);
+
+        long count = accountsRepository.countByEmailIdAndAccountNumber("test@email.com", "12345");
+
+        assertEquals(1L, count);
+        verify(mongoCollection).countDocuments(any(Bson.class));
+    }
+
+    @Test
+    void countByEmailIdAndAccountNumber_returnsZeroWhenNotFound() {
+        when(mongoCollection.countDocuments(any(Bson.class))).thenReturn(0L);
+
+        long count = accountsRepository.countByEmailIdAndAccountNumber("notfound@email.com", "99999");
+
+        assertEquals(0L, count);
+    }
+
+    @Test
+    void getAccountByAccountNumber_returnsAccountWhenFound() {
+        Document doc = new Document()
+            .append("account_number", "12345")
+            .append("email_id", "test@email.com")
+            .append("balance", 1000.0)
+            .append("name", "Test User")
+            .append("account_type", "savings");
+
+        Iterator<Document> iterator = Arrays.asList(doc).iterator();
+        when(mongoCollection.find()).thenReturn(findIterable);
+        when(findIterable.iterator()).thenReturn(iterator);
+
+        AccountDocument account = accountsRepository.getAccountByAccountNumber("12345");
+
+        assertNotNull(account);
+        assertEquals("12345", account.getAccountNumber());
+        assertEquals("test@email.com", account.getEmailId());
+        assertEquals(1000.0, account.getBalance());
+    }
+
+    @Test
+    void getAccountByAccountNumber_returnsNullWhenNotFound() {
+        Iterator<Document> iterator = Arrays.<Document>asList().iterator();
+        when(mongoCollection.find()).thenReturn(findIterable);
+        when(findIterable.iterator()).thenReturn(iterator);
+
+        AccountDocument account = accountsRepository.getAccountByAccountNumber("nonexistent");
+
+        assertNull(account);
+    }
+
+    @Test
+    void updateBalance_updatesSuccessfully() {
+        UpdateResult updateResult = mock(UpdateResult.class);
+        when(mongoCollection.updateOne(any(Bson.class), any(Bson.class))).thenReturn(updateResult);
+
+        accountsRepository.updateBalance("12345", 2000.0);
+
+        verify(mongoCollection).updateOne(any(Bson.class), any(Bson.class));
+    }
+}
+```
+
+#### 7. LoansRepository Test
+**File**: `loan-java/src/test/java/com/martianbank/loan/repository/LoansRepositoryTest.java`
+
+```java
+package com.martianbank.loan.repository;
+
+import com.martianbank.loan.model.LoanDocument;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.InsertOneResult;
+import org.bson.Document;
+import org.bson.conversions.Bson;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class LoansRepositoryTest {
+
+    @Mock
+    MongoClient mongoClient;
+
+    @Mock
+    MongoDatabase mongoDatabase;
+
+    @Mock
+    MongoCollection<Document> mongoCollection;
+
+    @Mock
+    FindIterable<Document> findIterable;
+
+    @InjectMocks
+    LoansRepository loansRepository;
+
+    @BeforeEach
+    void setUp() {
+        when(mongoClient.getDatabase("bank")).thenReturn(mongoDatabase);
+        when(mongoDatabase.getCollection("loans")).thenReturn(mongoCollection);
+    }
+
+    @Test
+    void insertLoan_insertsDocumentWithAllFields() {
+        LoanDocument loan = new LoanDocument();
+        loan.setName("John Doe");
+        loan.setEmail("john@test.com");
+        loan.setAccountType("savings");
+        loan.setAccountNumber("12345");
+        loan.setGovtIdType("passport");
+        loan.setGovtIdNumber("ABC123");
+        loan.setLoanType("personal");
+        loan.setLoanAmount(5000.0);
+        loan.setInterestRate(5.5);
+        loan.setTimePeriod("12 months");
+        loan.setStatus("Approved");
+        loan.setTimestampDate(LocalDateTime.now());
+
+        InsertOneResult insertResult = mock(InsertOneResult.class);
+        when(mongoCollection.insertOne(any(Document.class))).thenReturn(insertResult);
+
+        loansRepository.insertLoan(loan);
+
+        ArgumentCaptor<Document> docCaptor = ArgumentCaptor.forClass(Document.class);
+        verify(mongoCollection).insertOne(docCaptor.capture());
+
+        Document insertedDoc = docCaptor.getValue();
+        assertEquals("John Doe", insertedDoc.getString("name"));
+        assertEquals("john@test.com", insertedDoc.getString("email"));
+        assertEquals("12345", insertedDoc.getString("account_number"));
+        assertEquals("Approved", insertedDoc.getString("status"));
+        assertEquals(5000.0, insertedDoc.getDouble("loan_amount"));
+    }
+
+    @Test
+    void findByEmail_returnsLoansWhenFound() {
+        Document doc = new Document()
+            .append("name", "John Doe")
+            .append("email", "john@test.com")
+            .append("account_type", "savings")
+            .append("account_number", "12345")
+            .append("govt_id_type", "passport")
+            .append("govt_id_number", "ABC123")
+            .append("loan_type", "personal")
+            .append("loan_amount", 5000.0)
+            .append("interest_rate", 5.5)
+            .append("time_period", "12 months")
+            .append("status", "Approved")
+            .append("timestamp", new Date());
+
+        Iterator<Document> iterator = Arrays.asList(doc).iterator();
+        when(mongoCollection.find(any(Bson.class))).thenReturn(findIterable);
+        when(findIterable.iterator()).thenReturn(iterator);
+
+        List<LoanDocument> loans = loansRepository.findByEmail("john@test.com");
+
+        assertEquals(1, loans.size());
+        assertEquals("John Doe", loans.get(0).getName());
+        assertEquals("john@test.com", loans.get(0).getEmail());
+        assertEquals("Approved", loans.get(0).getStatus());
+    }
+
+    @Test
+    void findByEmail_returnsEmptyListWhenNoLoansFound() {
+        Iterator<Document> iterator = Arrays.<Document>asList().iterator();
+        when(mongoCollection.find(any(Bson.class))).thenReturn(findIterable);
+        when(findIterable.iterator()).thenReturn(iterator);
+
+        List<LoanDocument> loans = loansRepository.findByEmail("nobody@test.com");
+
+        assertTrue(loans.isEmpty());
+    }
+}
+```
+
+### Success Criteria:
+
+#### Automated Verification:
+- [ ] All tests pass: `cd loan-java && ./gradlew test`
+- [ ] Coverage report generated: `cd loan-java && ./gradlew jacocoTestReport`
+- [ ] Model classes achieve ≥ 90% line coverage
+- [ ] Repository classes achieve ≥ 90% line coverage
+- [ ] Coverage threshold passes: `cd loan-java && ./gradlew jacocoTestCoverageVerification`
+
+#### Manual Verification:
+- [ ] All model tests verify JSON serialization with snake_case field names
+- [ ] Repository tests verify correct MongoDB query construction
+- [ ] Mocks properly isolate tests from actual database
+
 **Implementation Note**: After completing this phase and all automated verification passes, pause here for manual confirmation before proceeding to Phase 3.
 
 ---
@@ -967,6 +1675,235 @@ public class LoanService {
 - [ ] Log messages match Python log format
 - [ ] Approval condition (amount >= 1) matches Python
 
+**Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 3.5 for testing.
+
+---
+
+## Phase 3.5: Business Logic Tests
+
+### Overview
+Create unit tests for the LoanService class, testing all business logic paths with mocked repository dependencies.
+
+### Changes Required:
+
+#### 1. LoanService Test
+**File**: `loan-java/src/test/java/com/martianbank/loan/service/LoanServiceTest.java`
+
+```java
+package com.martianbank.loan.service;
+
+import com.martianbank.loan.model.*;
+import com.martianbank.loan.repository.AccountsRepository;
+import com.martianbank.loan.repository.LoansRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class LoanServiceTest {
+
+    @Mock
+    AccountsRepository accountsRepository;
+
+    @Mock
+    LoansRepository loansRepository;
+
+    @InjectMocks
+    LoanService loanService;
+
+    private LoanRequestDto validRequest;
+    private AccountDocument validAccount;
+
+    @BeforeEach
+    void setUp() {
+        validRequest = new LoanRequestDto();
+        validRequest.setName("John Doe");
+        validRequest.setEmail("john@test.com");
+        validRequest.setAccountType("savings");
+        validRequest.setAccountNumber("12345");
+        validRequest.setGovtIdType("passport");
+        validRequest.setGovtIdNumber("ABC123");
+        validRequest.setLoanType("personal");
+        validRequest.setLoanAmount(5000.0);
+        validRequest.setInterestRate(5.5);
+        validRequest.setTimePeriod("12 months");
+
+        validAccount = new AccountDocument();
+        validAccount.setAccountNumber("12345");
+        validAccount.setEmailId("john@test.com");
+        validAccount.setBalance(1000.0);
+    }
+
+    @Test
+    void processLoanRequest_approvesLoanWhenAccountExistsAndAmountValid() {
+        when(accountsRepository.getAccountByAccountNumber("12345")).thenReturn(validAccount);
+        when(accountsRepository.countByEmailIdAndAccountNumber("john@test.com", "12345")).thenReturn(1L);
+
+        LoanResponseDto response = loanService.processLoanRequest(validRequest);
+
+        assertTrue(response.isApproved());
+        assertEquals("Loan Approved", response.getMessage());
+        verify(accountsRepository).updateBalance("12345", 6000.0);
+        verify(loansRepository).insertLoan(any(LoanDocument.class));
+    }
+
+    @Test
+    void processLoanRequest_rejectsWhenAccountNotFound() {
+        when(accountsRepository.getAccountByAccountNumber("12345")).thenReturn(validAccount);
+        when(accountsRepository.countByEmailIdAndAccountNumber("john@test.com", "12345")).thenReturn(0L);
+
+        LoanResponseDto response = loanService.processLoanRequest(validRequest);
+
+        assertFalse(response.isApproved());
+        assertEquals("Email or Account number not found.", response.getMessage());
+        verify(accountsRepository, never()).updateBalance(anyString(), anyDouble());
+        verify(loansRepository, never()).insertLoan(any());
+    }
+
+    @Test
+    void processLoanRequest_rejectsWhenAmountBelowOne() {
+        validRequest.setLoanAmount(0.5);
+        when(accountsRepository.getAccountByAccountNumber("12345")).thenReturn(validAccount);
+        when(accountsRepository.countByEmailIdAndAccountNumber("john@test.com", "12345")).thenReturn(1L);
+
+        LoanResponseDto response = loanService.processLoanRequest(validRequest);
+
+        assertFalse(response.isApproved());
+        assertEquals("Loan Rejected", response.getMessage());
+        verify(accountsRepository, never()).updateBalance(anyString(), anyDouble());
+        verify(loansRepository).insertLoan(argThat(loan -> "Declined".equals(loan.getStatus())));
+    }
+
+    @Test
+    void processLoanRequest_rejectsWhenAmountIsZero() {
+        validRequest.setLoanAmount(0.0);
+        when(accountsRepository.getAccountByAccountNumber("12345")).thenReturn(validAccount);
+        when(accountsRepository.countByEmailIdAndAccountNumber("john@test.com", "12345")).thenReturn(1L);
+
+        LoanResponseDto response = loanService.processLoanRequest(validRequest);
+
+        assertFalse(response.isApproved());
+        assertEquals("Loan Rejected", response.getMessage());
+    }
+
+    @Test
+    void processLoanRequest_rejectsWhenAmountIsNegative() {
+        validRequest.setLoanAmount(-100.0);
+        when(accountsRepository.getAccountByAccountNumber("12345")).thenReturn(validAccount);
+        when(accountsRepository.countByEmailIdAndAccountNumber("john@test.com", "12345")).thenReturn(1L);
+
+        LoanResponseDto response = loanService.processLoanRequest(validRequest);
+
+        assertFalse(response.isApproved());
+        assertEquals("Loan Rejected", response.getMessage());
+    }
+
+    @Test
+    void processLoanRequest_approvesWhenAmountIsExactlyOne() {
+        validRequest.setLoanAmount(1.0);
+        when(accountsRepository.getAccountByAccountNumber("12345")).thenReturn(validAccount);
+        when(accountsRepository.countByEmailIdAndAccountNumber("john@test.com", "12345")).thenReturn(1L);
+
+        LoanResponseDto response = loanService.processLoanRequest(validRequest);
+
+        assertTrue(response.isApproved());
+        assertEquals("Loan Approved", response.getMessage());
+        verify(accountsRepository).updateBalance("12345", 1001.0);
+    }
+
+    @Test
+    void processLoanRequest_savesLoanWithApprovedStatus() {
+        when(accountsRepository.getAccountByAccountNumber("12345")).thenReturn(validAccount);
+        when(accountsRepository.countByEmailIdAndAccountNumber("john@test.com", "12345")).thenReturn(1L);
+
+        loanService.processLoanRequest(validRequest);
+
+        verify(loansRepository).insertLoan(argThat(loan ->
+            "Approved".equals(loan.getStatus()) &&
+            "John Doe".equals(loan.getName()) &&
+            "john@test.com".equals(loan.getEmail()) &&
+            loan.getLoanAmount() == 5000.0
+        ));
+    }
+
+    @Test
+    void processLoanRequest_savesLoanWithDeclinedStatus() {
+        validRequest.setLoanAmount(0.5);
+        when(accountsRepository.getAccountByAccountNumber("12345")).thenReturn(validAccount);
+        when(accountsRepository.countByEmailIdAndAccountNumber("john@test.com", "12345")).thenReturn(1L);
+
+        loanService.processLoanRequest(validRequest);
+
+        verify(loansRepository).insertLoan(argThat(loan ->
+            "Declined".equals(loan.getStatus())
+        ));
+    }
+
+    @Test
+    void getLoanHistory_returnsLoansFromRepository() {
+        LoanDocument loan1 = new LoanDocument();
+        loan1.setEmail("john@test.com");
+        loan1.setLoanAmount(5000.0);
+
+        LoanDocument loan2 = new LoanDocument();
+        loan2.setEmail("john@test.com");
+        loan2.setLoanAmount(3000.0);
+
+        when(loansRepository.findByEmail("john@test.com")).thenReturn(Arrays.asList(loan1, loan2));
+
+        List<LoanDocument> history = loanService.getLoanHistory("john@test.com");
+
+        assertEquals(2, history.size());
+        verify(loansRepository).findByEmail("john@test.com");
+    }
+
+    @Test
+    void getLoanHistory_returnsEmptyListWhenNoLoans() {
+        when(loansRepository.findByEmail("nobody@test.com")).thenReturn(Collections.emptyList());
+
+        List<LoanDocument> history = loanService.getLoanHistory("nobody@test.com");
+
+        assertTrue(history.isEmpty());
+    }
+
+    @Test
+    void processLoanRequest_setsTimestampOnLoan() {
+        when(accountsRepository.getAccountByAccountNumber("12345")).thenReturn(validAccount);
+        when(accountsRepository.countByEmailIdAndAccountNumber("john@test.com", "12345")).thenReturn(1L);
+
+        loanService.processLoanRequest(validRequest);
+
+        verify(loansRepository).insertLoan(argThat(loan ->
+            loan.getTimestampDate() != null
+        ));
+    }
+}
+```
+
+### Success Criteria:
+
+#### Automated Verification:
+- [ ] All tests pass: `cd loan-java && ./gradlew test`
+- [ ] Coverage report generated: `cd loan-java && ./gradlew jacocoTestReport`
+- [ ] LoanService class achieves ≥ 90% line coverage
+- [ ] Coverage threshold passes: `cd loan-java && ./gradlew jacocoTestCoverageVerification`
+
+#### Manual Verification:
+- [ ] Tests cover all business logic branches (approval, rejection reasons)
+- [ ] Tests verify exact behavior match with Python implementation
+- [ ] All repository interactions are properly verified
+
 **Implementation Note**: After completing this phase and all automated verification passes, pause here for manual confirmation before proceeding to Phase 4.
 
 ---
@@ -1046,6 +1983,264 @@ public class LoanResource {
 - [ ] Endpoint paths match Python exactly (`/loan/request`, `/loan/history`)
 - [ ] HTTP methods match (POST for both)
 - [ ] Response JSON format matches Python output
+
+**Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 4.5 for testing.
+
+---
+
+## Phase 4.5: REST Endpoint Tests
+
+### Overview
+Create unit tests for REST endpoints using REST Assured and mocked service layer.
+
+### Changes Required:
+
+#### 1. LoanResource Test
+**File**: `loan-java/src/test/java/com/martianbank/loan/resource/LoanResourceTest.java`
+
+```java
+package com.martianbank.loan.resource;
+
+import com.martianbank.loan.model.*;
+import com.martianbank.loan.service.LoanService;
+import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.http.ContentType;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@QuarkusTest
+class LoanResourceTest {
+
+    @InjectMock
+    LoanService loanService;
+
+    @Test
+    void processLoanRequest_returnsApprovedResponse() {
+        when(loanService.processLoanRequest(any(LoanRequestDto.class)))
+            .thenReturn(new LoanResponseDto(true, "Loan Approved"));
+
+        given()
+            .contentType(ContentType.JSON)
+            .body("""
+                {
+                    "name": "John Doe",
+                    "email": "john@test.com",
+                    "account_type": "savings",
+                    "account_number": "12345",
+                    "govt_id_type": "passport",
+                    "govt_id_number": "ABC123",
+                    "loan_type": "personal",
+                    "loan_amount": 5000,
+                    "interest_rate": 5.5,
+                    "time_period": "12 months"
+                }
+                """)
+        .when()
+            .post("/loan/request")
+        .then()
+            .statusCode(200)
+            .contentType(ContentType.JSON)
+            .body("approved", is(true))
+            .body("message", equalTo("Loan Approved"));
+    }
+
+    @Test
+    void processLoanRequest_returnsRejectedResponse() {
+        when(loanService.processLoanRequest(any(LoanRequestDto.class)))
+            .thenReturn(new LoanResponseDto(false, "Email or Account number not found."));
+
+        given()
+            .contentType(ContentType.JSON)
+            .body("""
+                {
+                    "name": "Jane Doe",
+                    "email": "jane@invalid.com",
+                    "account_type": "savings",
+                    "account_number": "99999",
+                    "govt_id_type": "passport",
+                    "govt_id_number": "XYZ789",
+                    "loan_type": "personal",
+                    "loan_amount": 1000,
+                    "interest_rate": 4.5,
+                    "time_period": "6 months"
+                }
+                """)
+        .when()
+            .post("/loan/request")
+        .then()
+            .statusCode(200)
+            .body("approved", is(false))
+            .body("message", equalTo("Email or Account number not found."));
+    }
+
+    @Test
+    void processLoanRequest_callsServiceWithCorrectDto() {
+        when(loanService.processLoanRequest(any(LoanRequestDto.class)))
+            .thenReturn(new LoanResponseDto(true, "Loan Approved"));
+
+        given()
+            .contentType(ContentType.JSON)
+            .body("""
+                {
+                    "name": "Test User",
+                    "email": "test@example.com",
+                    "account_type": "checking",
+                    "account_number": "67890",
+                    "govt_id_type": "license",
+                    "govt_id_number": "DRV456",
+                    "loan_type": "auto",
+                    "loan_amount": 15000,
+                    "interest_rate": 3.9,
+                    "time_period": "36 months"
+                }
+                """)
+        .when()
+            .post("/loan/request")
+        .then()
+            .statusCode(200);
+
+        verify(loanService).processLoanRequest(argThat(dto ->
+            "Test User".equals(dto.getName()) &&
+            "test@example.com".equals(dto.getEmail()) &&
+            "checking".equals(dto.getAccountType()) &&
+            "67890".equals(dto.getAccountNumber()) &&
+            dto.getLoanAmount() == 15000.0
+        ));
+    }
+
+    @Test
+    void getLoanHistory_returnsLoansArray() {
+        LoanDocument loan1 = new LoanDocument();
+        loan1.setName("John Doe");
+        loan1.setEmail("john@test.com");
+        loan1.setAccountType("savings");
+        loan1.setAccountNumber("12345");
+        loan1.setGovtIdType("passport");
+        loan1.setGovtIdNumber("ABC123");
+        loan1.setLoanType("personal");
+        loan1.setLoanAmount(5000.0);
+        loan1.setInterestRate(5.5);
+        loan1.setTimePeriod("12 months");
+        loan1.setStatus("Approved");
+        loan1.setTimestampDate(LocalDateTime.of(2024, 1, 15, 10, 30, 0));
+
+        when(loanService.getLoanHistory("john@test.com")).thenReturn(Arrays.asList(loan1));
+
+        given()
+            .contentType(ContentType.JSON)
+            .body("{\"email\": \"john@test.com\"}")
+        .when()
+            .post("/loan/history")
+        .then()
+            .statusCode(200)
+            .contentType(ContentType.JSON)
+            .body("$", hasSize(1))
+            .body("[0].name", equalTo("John Doe"))
+            .body("[0].email", equalTo("john@test.com"))
+            .body("[0].account_type", equalTo("savings"))
+            .body("[0].account_number", equalTo("12345"))
+            .body("[0].loan_amount", equalTo(5000.0f))
+            .body("[0].status", equalTo("Approved"))
+            .body("[0].timestamp", equalTo("2024-01-15T10:30"));
+    }
+
+    @Test
+    void getLoanHistory_returnsEmptyArrayWhenNoLoans() {
+        when(loanService.getLoanHistory("nobody@test.com")).thenReturn(Collections.emptyList());
+
+        given()
+            .contentType(ContentType.JSON)
+            .body("{\"email\": \"nobody@test.com\"}")
+        .when()
+            .post("/loan/history")
+        .then()
+            .statusCode(200)
+            .body("$", hasSize(0));
+    }
+
+    @Test
+    void getLoanHistory_returnsMultipleLoans() {
+        LoanDocument loan1 = new LoanDocument();
+        loan1.setName("John Doe");
+        loan1.setEmail("john@test.com");
+        loan1.setStatus("Approved");
+        loan1.setLoanAmount(5000.0);
+        loan1.setTimestampDate(LocalDateTime.now());
+
+        LoanDocument loan2 = new LoanDocument();
+        loan2.setName("John Doe");
+        loan2.setEmail("john@test.com");
+        loan2.setStatus("Declined");
+        loan2.setLoanAmount(100000.0);
+        loan2.setTimestampDate(LocalDateTime.now());
+
+        when(loanService.getLoanHistory("john@test.com")).thenReturn(Arrays.asList(loan1, loan2));
+
+        given()
+            .contentType(ContentType.JSON)
+            .body("{\"email\": \"john@test.com\"}")
+        .when()
+            .post("/loan/history")
+        .then()
+            .statusCode(200)
+            .body("$", hasSize(2))
+            .body("[0].status", equalTo("Approved"))
+            .body("[1].status", equalTo("Declined"));
+    }
+
+    @Test
+    void processLoanRequest_endpointPathIsCorrect() {
+        when(loanService.processLoanRequest(any(LoanRequestDto.class)))
+            .thenReturn(new LoanResponseDto(true, "Success"));
+
+        // Verify exact path /loan/request
+        given()
+            .contentType(ContentType.JSON)
+            .body("{\"name\":\"Test\",\"email\":\"test@test.com\",\"account_type\":\"savings\",\"account_number\":\"123\",\"govt_id_type\":\"id\",\"govt_id_number\":\"123\",\"loan_type\":\"personal\",\"loan_amount\":100,\"interest_rate\":5,\"time_period\":\"12\"}")
+        .when()
+            .post("/loan/request")
+        .then()
+            .statusCode(200);
+    }
+
+    @Test
+    void getLoanHistory_endpointPathIsCorrect() {
+        when(loanService.getLoanHistory(anyString())).thenReturn(Collections.emptyList());
+
+        // Verify exact path /loan/history
+        given()
+            .contentType(ContentType.JSON)
+            .body("{\"email\": \"test@test.com\"}")
+        .when()
+            .post("/loan/history")
+        .then()
+            .statusCode(200);
+    }
+}
+```
+
+### Success Criteria:
+
+#### Automated Verification:
+- [ ] All tests pass: `cd loan-java && ./gradlew test`
+- [ ] Coverage report generated: `cd loan-java && ./gradlew jacocoTestReport`
+- [ ] LoanResource class achieves ≥ 90% line coverage
+- [ ] Coverage threshold passes: `cd loan-java && ./gradlew jacocoTestCoverageVerification`
+
+#### Manual Verification:
+- [ ] Tests verify correct endpoint paths (`/loan/request`, `/loan/history`)
+- [ ] Tests verify correct HTTP methods (POST)
+- [ ] Tests verify JSON response format matches Python implementation
+- [ ] Tests verify snake_case field names in responses
 
 **Implementation Note**: After completing this phase and all automated verification passes, pause here for manual confirmation before proceeding to Phase 5.
 
@@ -1172,6 +2367,300 @@ public class LoanGrpcService extends LoanServiceGrpc.LoanServiceImplBase {
 - [ ] gRPC service methods match proto definition
 - [ ] Response format matches Python gRPC implementation
 - [ ] Can be called from existing dashboard service
+
+**Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 5.5 for testing.
+
+---
+
+## Phase 5.5: gRPC Service Tests
+
+### Overview
+Create unit tests for the gRPC service implementation, testing request/response mapping and service delegation.
+
+### Changes Required:
+
+#### 1. LoanGrpcService Test
+**File**: `loan-java/src/test/java/com/martianbank/loan/grpc/LoanGrpcServiceTest.java`
+
+```java
+package com.martianbank.loan.grpc;
+
+import com.martianbank.loan.model.*;
+import com.martianbank.loan.service.LoanService;
+import io.grpc.stub.StreamObserver;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class LoanGrpcServiceTest {
+
+    @Mock
+    LoanService loanService;
+
+    @Mock
+    StreamObserver<LoanResponse> loanResponseObserver;
+
+    @Mock
+    StreamObserver<LoansHistoryResponse> historyResponseObserver;
+
+    @InjectMocks
+    LoanGrpcService loanGrpcService;
+
+    private LoanRequest validGrpcRequest;
+
+    @BeforeEach
+    void setUp() {
+        validGrpcRequest = LoanRequest.newBuilder()
+            .setName("John Doe")
+            .setEmail("john@test.com")
+            .setAccountType("savings")
+            .setAccountNumber("12345")
+            .setGovtIdType("passport")
+            .setGovtIdNumber("ABC123")
+            .setLoanType("personal")
+            .setLoanAmount(5000.0)
+            .setInterestRate(5.5)
+            .setTimePeriod("12 months")
+            .build();
+    }
+
+    @Test
+    void processLoanRequest_returnsApprovedResponse() {
+        when(loanService.processLoanRequest(any(LoanRequestDto.class)))
+            .thenReturn(new LoanResponseDto(true, "Loan Approved"));
+
+        loanGrpcService.processLoanRequest(validGrpcRequest, loanResponseObserver);
+
+        ArgumentCaptor<LoanResponse> responseCaptor = ArgumentCaptor.forClass(LoanResponse.class);
+        verify(loanResponseObserver).onNext(responseCaptor.capture());
+        verify(loanResponseObserver).onCompleted();
+
+        LoanResponse response = responseCaptor.getValue();
+        assertTrue(response.getApproved());
+        assertEquals("Loan Approved", response.getMessage());
+    }
+
+    @Test
+    void processLoanRequest_returnsRejectedResponse() {
+        when(loanService.processLoanRequest(any(LoanRequestDto.class)))
+            .thenReturn(new LoanResponseDto(false, "Email or Account number not found."));
+
+        loanGrpcService.processLoanRequest(validGrpcRequest, loanResponseObserver);
+
+        ArgumentCaptor<LoanResponse> responseCaptor = ArgumentCaptor.forClass(LoanResponse.class);
+        verify(loanResponseObserver).onNext(responseCaptor.capture());
+
+        LoanResponse response = responseCaptor.getValue();
+        assertFalse(response.getApproved());
+        assertEquals("Email or Account number not found.", response.getMessage());
+    }
+
+    @Test
+    void processLoanRequest_mapsAllFieldsToDto() {
+        when(loanService.processLoanRequest(any(LoanRequestDto.class)))
+            .thenReturn(new LoanResponseDto(true, "Success"));
+
+        loanGrpcService.processLoanRequest(validGrpcRequest, loanResponseObserver);
+
+        ArgumentCaptor<LoanRequestDto> dtoCaptor = ArgumentCaptor.forClass(LoanRequestDto.class);
+        verify(loanService).processLoanRequest(dtoCaptor.capture());
+
+        LoanRequestDto dto = dtoCaptor.getValue();
+        assertEquals("John Doe", dto.getName());
+        assertEquals("john@test.com", dto.getEmail());
+        assertEquals("savings", dto.getAccountType());
+        assertEquals("12345", dto.getAccountNumber());
+        assertEquals("passport", dto.getGovtIdType());
+        assertEquals("ABC123", dto.getGovtIdNumber());
+        assertEquals("personal", dto.getLoanType());
+        assertEquals(5000.0, dto.getLoanAmount());
+        assertEquals(5.5, dto.getInterestRate());
+        assertEquals("12 months", dto.getTimePeriod());
+    }
+
+    @Test
+    void processLoanRequest_completesStreamAfterResponse() {
+        when(loanService.processLoanRequest(any(LoanRequestDto.class)))
+            .thenReturn(new LoanResponseDto(true, "Success"));
+
+        loanGrpcService.processLoanRequest(validGrpcRequest, loanResponseObserver);
+
+        verify(loanResponseObserver).onNext(any());
+        verify(loanResponseObserver).onCompleted();
+        verify(loanResponseObserver, never()).onError(any());
+    }
+
+    @Test
+    void getLoanHistory_returnsLoansInResponse() {
+        LoanDocument loan = new LoanDocument();
+        loan.setName("John Doe");
+        loan.setEmail("john@test.com");
+        loan.setAccountType("savings");
+        loan.setAccountNumber("12345");
+        loan.setGovtIdType("passport");
+        loan.setGovtIdNumber("ABC123");
+        loan.setLoanType("personal");
+        loan.setLoanAmount(5000.0);
+        loan.setInterestRate(5.5);
+        loan.setTimePeriod("12 months");
+        loan.setStatus("Approved");
+        loan.setTimestampDate(LocalDateTime.of(2024, 1, 15, 10, 30, 0));
+
+        when(loanService.getLoanHistory("john@test.com")).thenReturn(Arrays.asList(loan));
+
+        LoansHistoryRequest request = LoansHistoryRequest.newBuilder()
+            .setEmail("john@test.com")
+            .build();
+
+        loanGrpcService.getLoanHistory(request, historyResponseObserver);
+
+        ArgumentCaptor<LoansHistoryResponse> responseCaptor = ArgumentCaptor.forClass(LoansHistoryResponse.class);
+        verify(historyResponseObserver).onNext(responseCaptor.capture());
+        verify(historyResponseObserver).onCompleted();
+
+        LoansHistoryResponse response = responseCaptor.getValue();
+        assertEquals(1, response.getLoansCount());
+
+        Loan grpcLoan = response.getLoans(0);
+        assertEquals("John Doe", grpcLoan.getName());
+        assertEquals("john@test.com", grpcLoan.getEmail());
+        assertEquals("savings", grpcLoan.getAccountType());
+        assertEquals("12345", grpcLoan.getAccountNumber());
+        assertEquals("Approved", grpcLoan.getStatus());
+        assertEquals("2024-01-15T10:30", grpcLoan.getTimestamp());
+    }
+
+    @Test
+    void getLoanHistory_returnsEmptyWhenNoLoans() {
+        when(loanService.getLoanHistory("nobody@test.com")).thenReturn(Collections.emptyList());
+
+        LoansHistoryRequest request = LoansHistoryRequest.newBuilder()
+            .setEmail("nobody@test.com")
+            .build();
+
+        loanGrpcService.getLoanHistory(request, historyResponseObserver);
+
+        ArgumentCaptor<LoansHistoryResponse> responseCaptor = ArgumentCaptor.forClass(LoansHistoryResponse.class);
+        verify(historyResponseObserver).onNext(responseCaptor.capture());
+
+        LoansHistoryResponse response = responseCaptor.getValue();
+        assertEquals(0, response.getLoansCount());
+    }
+
+    @Test
+    void getLoanHistory_returnsMultipleLoans() {
+        LoanDocument loan1 = new LoanDocument();
+        loan1.setName("John");
+        loan1.setStatus("Approved");
+        loan1.setTimestampDate(LocalDateTime.now());
+
+        LoanDocument loan2 = new LoanDocument();
+        loan2.setName("John");
+        loan2.setStatus("Declined");
+        loan2.setTimestampDate(LocalDateTime.now());
+
+        when(loanService.getLoanHistory("john@test.com")).thenReturn(Arrays.asList(loan1, loan2));
+
+        LoansHistoryRequest request = LoansHistoryRequest.newBuilder()
+            .setEmail("john@test.com")
+            .build();
+
+        loanGrpcService.getLoanHistory(request, historyResponseObserver);
+
+        ArgumentCaptor<LoansHistoryResponse> responseCaptor = ArgumentCaptor.forClass(LoansHistoryResponse.class);
+        verify(historyResponseObserver).onNext(responseCaptor.capture());
+
+        LoansHistoryResponse response = responseCaptor.getValue();
+        assertEquals(2, response.getLoansCount());
+        assertEquals("Approved", response.getLoans(0).getStatus());
+        assertEquals("Declined", response.getLoans(1).getStatus());
+    }
+
+    @Test
+    void getLoanHistory_mapsAllLoanFieldsToGrpc() {
+        LoanDocument loan = new LoanDocument();
+        loan.setName("Test User");
+        loan.setEmail("test@test.com");
+        loan.setAccountType("checking");
+        loan.setAccountNumber("99999");
+        loan.setGovtIdType("license");
+        loan.setGovtIdNumber("DRV789");
+        loan.setLoanType("auto");
+        loan.setLoanAmount(25000.0);
+        loan.setInterestRate(3.9);
+        loan.setTimePeriod("60 months");
+        loan.setStatus("Approved");
+        loan.setTimestampDate(LocalDateTime.of(2024, 6, 1, 14, 0, 0));
+
+        when(loanService.getLoanHistory("test@test.com")).thenReturn(Arrays.asList(loan));
+
+        LoansHistoryRequest request = LoansHistoryRequest.newBuilder()
+            .setEmail("test@test.com")
+            .build();
+
+        loanGrpcService.getLoanHistory(request, historyResponseObserver);
+
+        ArgumentCaptor<LoansHistoryResponse> responseCaptor = ArgumentCaptor.forClass(LoansHistoryResponse.class);
+        verify(historyResponseObserver).onNext(responseCaptor.capture());
+
+        Loan grpcLoan = responseCaptor.getValue().getLoans(0);
+        assertEquals("Test User", grpcLoan.getName());
+        assertEquals("test@test.com", grpcLoan.getEmail());
+        assertEquals("checking", grpcLoan.getAccountType());
+        assertEquals("99999", grpcLoan.getAccountNumber());
+        assertEquals("license", grpcLoan.getGovtIdType());
+        assertEquals("DRV789", grpcLoan.getGovtIdNumber());
+        assertEquals("auto", grpcLoan.getLoanType());
+        assertEquals(25000.0, grpcLoan.getLoanAmount());
+        assertEquals(3.9, grpcLoan.getInterestRate());
+        assertEquals("60 months", grpcLoan.getTimePeriod());
+        assertEquals("Approved", grpcLoan.getStatus());
+        assertEquals("2024-06-01T14:00", grpcLoan.getTimestamp());
+    }
+
+    @Test
+    void getLoanHistory_completesStreamAfterResponse() {
+        when(loanService.getLoanHistory(anyString())).thenReturn(Collections.emptyList());
+
+        LoansHistoryRequest request = LoansHistoryRequest.newBuilder()
+            .setEmail("test@test.com")
+            .build();
+
+        loanGrpcService.getLoanHistory(request, historyResponseObserver);
+
+        verify(historyResponseObserver).onNext(any());
+        verify(historyResponseObserver).onCompleted();
+        verify(historyResponseObserver, never()).onError(any());
+    }
+}
+```
+
+### Success Criteria:
+
+#### Automated Verification:
+- [ ] All tests pass: `cd loan-java && ./gradlew test`
+- [ ] Coverage report generated: `cd loan-java && ./gradlew jacocoTestReport`
+- [ ] LoanGrpcService class achieves ≥ 90% line coverage
+- [ ] Coverage threshold passes: `cd loan-java && ./gradlew jacocoTestCoverageVerification`
+- [ ] Overall project coverage ≥ 90%: Check `build/reports/jacoco/test/html/index.html`
+
+#### Manual Verification:
+- [ ] Tests verify correct field mapping from gRPC request to DTO
+- [ ] Tests verify correct field mapping from LoanDocument to gRPC Loan
+- [ ] Tests verify stream completion behavior
 
 **Implementation Note**: After completing this phase and all automated verification passes, pause here for manual confirmation before proceeding to Phase 6.
 
