@@ -71,8 +71,8 @@ quarkus.log.category."com.martianbank".level=DEBUG
 ## Success Criteria:
 
 ### Automated Verification:
-- [ ] Tests pass: `cd loan-java && ./gradlew test`
-- [ ] Coverage report generated: `cd loan-java && ./gradlew jacocoTestReport`
-- [ ] Phase 1 code coverage ≥ 90%: `cd loan-java && ./gradlew jacocoTestCoverageVerification`
+- [x] Tests pass: `cd loan-java && ./gradlew test`
+- [x] Coverage report generated: `cd loan-java && ./gradlew jacocoTestReport`
+- [x] Phase 1 code coverage ≥ 90%: `cd loan-java && ./gradlew jacocoTestCoverageVerification`
 
 **Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 2.

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoansRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">loan-java</a> &gt; <a href="index.source.html" class="el_package">com.martianbank.loan.repository</a> &gt; <span class="el_source">LoansRepository.java</span></div><h1>LoansRepository.java</h1><pre class="source lang-java linenums">package com.martianbank.loan.repository;
+
+import com.martianbank.loan.model.LoanDocument;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import org.bson.Document;
+import org.jboss.logging.Logger;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+@ApplicationScoped
+<span class="fc" id="L19">public class LoansRepository {</span>
+
+<span class="fc" id="L21">    private static final Logger LOG = Logger.getLogger(LoansRepository.class);</span>
+
+    @Inject
+    MongoClient mongoClient;
+
+    private MongoCollection&lt;Document&gt; getCollection() {
+<span class="fc" id="L27">        return mongoClient.getDatabase(&quot;bank&quot;).getCollection(&quot;loans&quot;);</span>
+    }
+
+    /**
+     * Insert a new loan document
+     * Matches Python: collection_loans.insert_one(loan_request)
+     */
+    public void insertLoan(LoanDocument loan) {
+<span class="fc" id="L35">        Document doc = new Document()</span>
+<span class="fc" id="L36">            .append(&quot;name&quot;, loan.getName())</span>
+<span class="fc" id="L37">            .append(&quot;email&quot;, loan.getEmail())</span>
+<span class="fc" id="L38">            .append(&quot;account_type&quot;, loan.getAccountType())</span>
+<span class="fc" id="L39">            .append(&quot;account_number&quot;, loan.getAccountNumber())</span>
+<span class="fc" id="L40">            .append(&quot;govt_id_type&quot;, loan.getGovtIdType())</span>
+<span class="fc" id="L41">            .append(&quot;govt_id_number&quot;, loan.getGovtIdNumber())</span>
+<span class="fc" id="L42">            .append(&quot;loan_type&quot;, loan.getLoanType())</span>
+<span class="fc" id="L43">            .append(&quot;loan_amount&quot;, loan.getLoanAmount())</span>
+<span class="fc" id="L44">            .append(&quot;interest_rate&quot;, loan.getInterestRate())</span>
+<span class="fc" id="L45">            .append(&quot;time_period&quot;, loan.getTimePeriod())</span>
+<span class="fc" id="L46">            .append(&quot;status&quot;, loan.getStatus())</span>
+<span class="fc" id="L47">            .append(&quot;timestamp&quot;, Date.from(loan.getTimestampDate().atZone(ZoneId.systemDefault()).toInstant()));</span>
+
+<span class="fc" id="L49">        getCollection().insertOne(doc);</span>
+<span class="fc" id="L50">        LOG.debugf(&quot;Inserted loan for account: %s&quot;, loan.getAccountNumber());</span>
+<span class="fc" id="L51">    }</span>
+
+    /**
+     * Find all loans by email
+     * Matches Python: collection_loans.find({&quot;email&quot;: email})
+     */
+    public List&lt;LoanDocument&gt; findByEmail(String email) {
+<span class="fc" id="L58">        List&lt;LoanDocument&gt; loans = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        for (Document doc : getCollection().find(Filters.eq(&quot;email&quot;, email))) {</span>
+<span class="fc" id="L61">            LoanDocument loan = new LoanDocument();</span>
+<span class="fc" id="L62">            loan.setName(doc.getString(&quot;name&quot;));</span>
+<span class="fc" id="L63">            loan.setEmail(doc.getString(&quot;email&quot;));</span>
+<span class="fc" id="L64">            loan.setAccountType(doc.getString(&quot;account_type&quot;));</span>
+<span class="fc" id="L65">            loan.setAccountNumber(doc.getString(&quot;account_number&quot;));</span>
+<span class="fc" id="L66">            loan.setGovtIdType(doc.getString(&quot;govt_id_type&quot;));</span>
+<span class="fc" id="L67">            loan.setGovtIdNumber(doc.getString(&quot;govt_id_number&quot;));</span>
+<span class="fc" id="L68">            loan.setLoanType(doc.getString(&quot;loan_type&quot;));</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">            loan.setLoanAmount(doc.getDouble(&quot;loan_amount&quot;) != null ? doc.getDouble(&quot;loan_amount&quot;) : 0.0);</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">            loan.setInterestRate(doc.getDouble(&quot;interest_rate&quot;) != null ? doc.getDouble(&quot;interest_rate&quot;) : 0.0);</span>
+<span class="fc" id="L71">            loan.setTimePeriod(doc.getString(&quot;time_period&quot;));</span>
+<span class="fc" id="L72">            loan.setStatus(doc.getString(&quot;status&quot;));</span>
+
+            // Convert Date to LocalDateTime
+<span class="fc" id="L75">            Date timestamp = doc.getDate(&quot;timestamp&quot;);</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">            if (timestamp != null) {</span>
+<span class="fc" id="L77">                loan.setTimestampDate(LocalDateTime.ofInstant(timestamp.toInstant(), ZoneId.systemDefault()));</span>
+            }
+
+<span class="fc" id="L80">            loans.add(loan);</span>
+<span class="fc" id="L81">        }</span>
+
+<span class="fc" id="L83">        return loans;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

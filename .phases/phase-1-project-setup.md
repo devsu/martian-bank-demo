@@ -255,8 +255,8 @@ public class LoanApplication {
 ## Success Criteria:
 
 ### Automated Verification:
-- [ ] Gradle build succeeds: `cd loan-java && ./gradlew build`
-- [ ] Proto files compile: `cd loan-java && ./gradlew quarkusGenerateCode`
-- [ ] Application starts without errors: `cd loan-java && ./gradlew quarkusDev`
+- [x] Gradle build succeeds: `cd loan-java && ./gradlew build`
+- [x] Proto files compile: `cd loan-java && ./gradlew quarkusGenerateCode`
+- [x] Application starts without errors: `cd loan-java && ./gradlew quarkusDev`
 
 **Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 1.5 for testing.

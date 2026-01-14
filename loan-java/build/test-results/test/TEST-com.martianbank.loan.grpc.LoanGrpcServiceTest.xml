@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.martianbank.loan.grpc.LoanGrpcServiceTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-01-14T20:06:15.542Z" hostname="hector.brito" time="0.238">
+  <properties/>
+  <testcase name="getLoanHistory_mapsAllLoanFieldsToGrpc()" classname="com.martianbank.loan.grpc.LoanGrpcServiceTest" time="0.212"/>
+  <testcase name="getLoanHistory_returnsEmptyWhenNoLoans()" classname="com.martianbank.loan.grpc.LoanGrpcServiceTest" time="0.002"/>
+  <testcase name="processLoanRequest_mapsAllFieldsToDto()" classname="com.martianbank.loan.grpc.LoanGrpcServiceTest" time="0.004"/>
+  <testcase name="processLoanRequest_returnsApprovedResponse()" classname="com.martianbank.loan.grpc.LoanGrpcServiceTest" time="0.002"/>
+  <testcase name="getLoanHistory_completesStreamAfterResponse()" classname="com.martianbank.loan.grpc.LoanGrpcServiceTest" time="0.003"/>
+  <testcase name="getLoanHistory_returnsLoansInResponse()" classname="com.martianbank.loan.grpc.LoanGrpcServiceTest" time="0.003"/>
+  <testcase name="processLoanRequest_returnsRejectedResponse()" classname="com.martianbank.loan.grpc.LoanGrpcServiceTest" time="0.003"/>
+  <testcase name="processLoanRequest_completesStreamAfterResponse()" classname="com.martianbank.loan.grpc.LoanGrpcServiceTest" time="0.003"/>
+  <testcase name="getLoanHistory_returnsMultipleLoans()" classname="com.martianbank.loan.grpc.LoanGrpcServiceTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

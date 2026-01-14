@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.martianbank.loan.LoanApplicationTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-01-14T20:06:12.456Z" hostname="hector.brito" time="0.328">
+  <properties/>
+  <testcase name="httpPortIsConfigured()" classname="com.martianbank.loan.LoanApplicationTest" time="0.322"/>
+  <testcase name="applicationNameIsConfigured()" classname="com.martianbank.loan.LoanApplicationTest" time="0.002"/>
+  <testcase name="applicationContextLoads()" classname="com.martianbank.loan.LoanApplicationTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - LoanServiceTest</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<h1>LoanServiceTest</h1>
+<div class="breadcrumbs">
+<a href="../index.html">all</a> &gt; 
+<a href="../packages/com.martianbank.loan.service.html">com.martianbank.loan.service</a> &gt; LoanServiceTest</div>
+<div id="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox" id="tests">
+<div class="counter">11</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="failures">
+<div class="counter">0</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="ignored">
+<div class="counter">0</div>
+<p>ignored</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="duration">
+<div class="counter">0.095s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox success" id="successRate">
+<div class="percent">100%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="tab-container">
+<ul class="tabLinks">
+<li>
+<a href="#">Tests</a>
+</li>
+<li>
+<a href="#">Standard output</a>
+</li>
+</ul>
+<div class="tab">
+<h2>Tests</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Duration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tr>
+<td class="success">getLoanHistory_returnsEmptyListWhenNoLoans()</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">getLoanHistory_returnsLoansFromRepository()</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">processLoanRequest_approvesLoanWhenAccountExistsAndAmountValid()</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">processLoanRequest_approvesWhenAmountIsExactlyOne()</td>
+<td class="success">0.003s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">processLoanRequest_rejectsWhenAccountNotFound()</td>
+<td class="success">0.068s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">processLoanRequest_rejectsWhenAmountBelowOne()</td>
+<td class="success">0.003s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">processLoanRequest_rejectsWhenAmountIsNegative()</td>
+<td class="success">0.004s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">processLoanRequest_rejectsWhenAmountIsZero()</td>
+<td class="success">0.002s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">processLoanRequest_savesLoanWithApprovedStatus()</td>
+<td class="success">0.003s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">processLoanRequest_savesLoanWithDeclinedStatus()</td>
+<td class="success">0.003s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">processLoanRequest_setsTimestampOnLoan()</td>
+<td class="success">0.003s</td>
+<td class="success">passed</td>
+</tr>
+</table>
+</div>
+<div class="tab">
+<h2>Standard output</h2>
+<span class="code">
+<pre id="class-stdout">2026-01-14 17:06:16,700 DEBUG [com.mar.loa.ser.LoanService] (Test worker) user account only based on account number search : com.martianbank.loan.model.AccountDocument@528f5a50
+2026-01-14 17:06:16,700 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Count whether the email and account exist or not : 0
+2026-01-14 17:06:16,702 DEBUG [com.mar.loa.ser.LoanService] (Test worker) user account only based on account number search : com.martianbank.loan.model.AccountDocument@6fd1a7c9
+2026-01-14 17:06:16,703 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Count whether the email and account exist or not : 1
+2026-01-14 17:06:16,703 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Result false
+2026-01-14 17:06:16,703 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Account: 12345
+2026-01-14 17:06:16,703 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Response: com.martianbank.loan.model.LoanResponseDto@aa43edc
+2026-01-14 17:06:16,705 DEBUG [com.mar.loa.ser.LoanService] (Test worker) user account only based on account number search : com.martianbank.loan.model.AccountDocument@4b37b02a
+2026-01-14 17:06:16,705 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Count whether the email and account exist or not : 1
+2026-01-14 17:06:16,705 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Result false
+2026-01-14 17:06:16,705 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Account: 12345
+2026-01-14 17:06:16,705 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Response: com.martianbank.loan.model.LoanResponseDto@17171d41
+2026-01-14 17:06:16,708 DEBUG [com.mar.loa.ser.LoanService] (Test worker) user account only based on account number search : com.martianbank.loan.model.AccountDocument@598e47eb
+2026-01-14 17:06:16,709 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Count whether the email and account exist or not : 1
+2026-01-14 17:06:16,709 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Result false
+2026-01-14 17:06:16,709 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Account: 12345
+2026-01-14 17:06:16,710 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Response: com.martianbank.loan.model.LoanResponseDto@4a58ba89
+2026-01-14 17:06:16,712 DEBUG [com.mar.loa.ser.LoanService] (Test worker) user account only based on account number search : com.martianbank.loan.model.AccountDocument@49e825a8
+2026-01-14 17:06:16,712 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Count whether the email and account exist or not : 1
+2026-01-14 17:06:16,712 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Result true
+2026-01-14 17:06:16,713 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Account: 12345
+2026-01-14 17:06:16,713 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Response: com.martianbank.loan.model.LoanResponseDto@65382d45
+2026-01-14 17:06:16,717 DEBUG [com.mar.loa.ser.LoanService] (Test worker) user account only based on account number search : com.martianbank.loan.model.AccountDocument@5378b5ec
+2026-01-14 17:06:16,717 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Count whether the email and account exist or not : 1
+2026-01-14 17:06:16,717 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Result true
+2026-01-14 17:06:16,717 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Account: 12345
+2026-01-14 17:06:16,718 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Response: com.martianbank.loan.model.LoanResponseDto@6e98de91
+2026-01-14 17:06:16,720 DEBUG [com.mar.loa.ser.LoanService] (Test worker) user account only based on account number search : com.martianbank.loan.model.AccountDocument@4eed8ede
+2026-01-14 17:06:16,720 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Count whether the email and account exist or not : 1
+2026-01-14 17:06:16,720 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Result true
+2026-01-14 17:06:16,720 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Account: 12345
+2026-01-14 17:06:16,720 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Response: com.martianbank.loan.model.LoanResponseDto@1b99a5ac
+2026-01-14 17:06:16,723 DEBUG [com.mar.loa.ser.LoanService] (Test worker) user account only based on account number search : com.martianbank.loan.model.AccountDocument@e00498a
+2026-01-14 17:06:16,723 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Count whether the email and account exist or not : 1
+2026-01-14 17:06:16,723 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Result true
+2026-01-14 17:06:16,723 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Account: 12345
+2026-01-14 17:06:16,723 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Response: com.martianbank.loan.model.LoanResponseDto@39ff3add
+2026-01-14 17:06:16,726 DEBUG [com.mar.loa.ser.LoanService] (Test worker) user account only based on account number search : com.martianbank.loan.model.AccountDocument@24c9fa8e
+2026-01-14 17:06:16,726 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Count whether the email and account exist or not : 1
+2026-01-14 17:06:16,726 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Result false
+2026-01-14 17:06:16,726 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Account: 12345
+2026-01-14 17:06:16,726 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Response: com.martianbank.loan.model.LoanResponseDto@2f0990db
+</pre>
+<button class="clipboard-copy-btn" aria-label="Copy to clipboard" data-copy-element-id="class-stdout">Copy</button>
+</span>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="https://www.gradle.org">Gradle 9.2.1</a> at Jan 14, 2026, 5:06:17 PM</p>
+</div>
+</div>
+</body>
+</html>

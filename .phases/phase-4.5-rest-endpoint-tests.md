@@ -241,9 +241,9 @@ class LoanResourceTest {
 ## Success Criteria:
 
 ### Automated Verification:
-- [ ] All tests pass: `cd loan-java && ./gradlew test`
-- [ ] Coverage report generated: `cd loan-java && ./gradlew jacocoTestReport`
-- [ ] LoanResource class achieves ≥ 90% line coverage
-- [ ] Coverage threshold passes: `cd loan-java && ./gradlew jacocoTestCoverageVerification`
+- [x] All tests pass: `cd loan-java && ./gradlew test`
+- [x] Coverage report generated: `cd loan-java && ./gradlew jacocoTestReport`
+- [x] LoanResource class achieves ≥ 90% line coverage (achieved: 100%)
+- [x] Coverage threshold passes: `cd loan-java && ./gradlew jacocoTestCoverageVerification`
 
 **Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 5.

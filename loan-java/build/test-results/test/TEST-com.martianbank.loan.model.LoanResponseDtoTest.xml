@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.martianbank.loan.model.LoanResponseDtoTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-01-14T20:06:16.078Z" hostname="hector.brito" time="0.006">
+  <properties/>
+  <testcase name="defaultConstructorCreatesEmptyObject()" classname="com.martianbank.loan.model.LoanResponseDtoTest" time="0.0"/>
+  <testcase name="serializesToJsonWithCorrectFieldNames()" classname="com.martianbank.loan.model.LoanResponseDtoTest" time="0.002"/>
+  <testcase name="deserializesFromJson()" classname="com.martianbank.loan.model.LoanResponseDtoTest" time="0.001"/>
+  <testcase name="constructorSetsFields()" classname="com.martianbank.loan.model.LoanResponseDtoTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

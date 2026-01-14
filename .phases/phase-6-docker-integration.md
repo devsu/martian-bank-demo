@@ -113,8 +113,8 @@ services:
 ## Success Criteria:
 
 ### Automated Verification:
-- [ ] Docker build succeeds: `docker build -t martian-bank-loan-java ./loan-java`
-- [ ] Container starts: `docker run -e DB_URL=mongodb://root:example@localhost:27017 -p 50053:50053 martian-bank-loan-java`
-- [ ] Full stack starts with Java loan: `docker-compose -f docker-compose.yaml -f docker-compose.java.yaml up --build`
+- [x] Docker build succeeds: `docker build -t martian-bank-loan-java ./loan-java`
+- [x] Container starts: `docker run -e DB_URL=mongodb://root:example@localhost:27017 -p 50053:50053 martian-bank-loan-java`
+- [x] Full stack starts with Java loan: `docker-compose -f docker-compose.yaml -f docker-compose.java.yaml up --build`
 
 **Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 7 for final manual verification.

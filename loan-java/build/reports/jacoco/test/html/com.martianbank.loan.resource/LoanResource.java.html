@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoanResource.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">loan-java</a> &gt; <a href="index.source.html" class="el_package">com.martianbank.loan.resource</a> &gt; <span class="el_source">LoanResource.java</span></div><h1>LoanResource.java</h1><pre class="source lang-java linenums">package com.martianbank.loan.resource;
+
+import com.martianbank.loan.model.*;
+import com.martianbank.loan.service.LoanService;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import org.jboss.logging.Logger;
+
+import java.util.List;
+
+/**
+ * REST endpoints for loan operations
+ * Exact replica of Python Flask routes
+ * Reference: loan/loan.py:185-201
+ */
+@Path(&quot;/loan&quot;)
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+<span class="fc" id="L20">public class LoanResource {</span>
+
+<span class="fc" id="L22">    private static final Logger LOG = Logger.getLogger(LoanResource.class);</span>
+
+    @Inject
+    LoanService loanService;
+
+    /**
+     * Process loan request endpoint
+     * Matches Python: @app.route(&quot;/loan/request&quot;, methods=[&quot;POST&quot;])
+     * Reference: loan/loan.py:187-192
+     */
+    @POST
+    @Path(&quot;/request&quot;)
+    public LoanResponseDto processLoanRequest(LoanRequestDto request) {
+<span class="fc" id="L35">        LOG.debugf(&quot;Request: %s&quot;, request);</span>
+<span class="fc" id="L36">        return loanService.processLoanRequest(request);</span>
+    }
+
+    /**
+     * Get loan history endpoint
+     * Matches Python: @app.route(&quot;/loan/history&quot;, methods=[&quot;POST&quot;])
+     * Reference: loan/loan.py:195-201
+     */
+    @POST
+    @Path(&quot;/history&quot;)
+    public List&lt;LoanDocument&gt; getLoanHistory(LoanHistoryRequestDto request) {
+<span class="fc" id="L47">        LOG.debug(&quot;----------------&gt; Request: /loan/history&quot;);</span>
+<span class="fc" id="L48">        LOG.debugf(&quot;Request: %s&quot;, request);</span>
+<span class="fc" id="L49">        return loanService.getLoanHistory(request.getEmail());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

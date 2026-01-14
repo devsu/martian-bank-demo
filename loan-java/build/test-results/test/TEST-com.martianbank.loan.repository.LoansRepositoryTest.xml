@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.martianbank.loan.repository.LoansRepositoryTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-01-14T20:06:16.578Z" hostname="hector.brito" time="0.054">
+  <properties/>
+  <testcase name="insertLoan_insertsDocumentWithAllFields()" classname="com.martianbank.loan.repository.LoansRepositoryTest" time="0.05"/>
+  <testcase name="findByEmail_returnsEmptyListWhenNoLoansFound()" classname="com.martianbank.loan.repository.LoansRepositoryTest" time="0.002"/>
+  <testcase name="findByEmail_returnsLoansWhenFound()" classname="com.martianbank.loan.repository.LoansRepositoryTest" time="0.002"/>
+  <system-out><![CDATA[2026-01-14 17:06:16,627 DEBUG [com.mar.loa.rep.LoansRepository] (Test worker) Inserted loan for account: 12345
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

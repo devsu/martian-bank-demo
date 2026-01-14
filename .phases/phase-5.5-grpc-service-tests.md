@@ -277,10 +277,10 @@ class LoanGrpcServiceTest {
 ## Success Criteria:
 
 ### Automated Verification:
-- [ ] All tests pass: `cd loan-java && ./gradlew test`
-- [ ] Coverage report generated: `cd loan-java && ./gradlew jacocoTestReport`
-- [ ] LoanGrpcService class achieves ≥ 90% line coverage
-- [ ] Coverage threshold passes: `cd loan-java && ./gradlew jacocoTestCoverageVerification`
-- [ ] Overall project coverage ≥ 90%: Check `build/reports/jacoco/test/html/index.html`
+- [x] All tests pass: `cd loan-java && ./gradlew test`
+- [x] Coverage report generated: `cd loan-java && ./gradlew jacocoTestReport`
+- [x] LoanGrpcService class achieves ≥ 90% line coverage
+- [x] Coverage threshold passes: `cd loan-java && ./gradlew jacocoTestCoverageVerification`
+- [x] Overall project coverage ≥ 90%: Check `build/reports/jacoco/test/html/index.html`
 
 **Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 6.

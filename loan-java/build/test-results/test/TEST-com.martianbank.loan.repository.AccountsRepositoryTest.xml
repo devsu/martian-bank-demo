@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.martianbank.loan.repository.AccountsRepositoryTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-01-14T20:06:16.087Z" hostname="hector.brito" time="0.49">
+  <properties/>
+  <testcase name="updateBalance_updatesSuccessfully()" classname="com.martianbank.loan.repository.AccountsRepositoryTest" time="0.459"/>
+  <testcase name="countByEmailIdAndAccountNumber_returnsZeroWhenNotFound()" classname="com.martianbank.loan.repository.AccountsRepositoryTest" time="0.005"/>
+  <testcase name="countByEmailIdAndAccountNumber_returnsCount()" classname="com.martianbank.loan.repository.AccountsRepositoryTest" time="0.008"/>
+  <testcase name="getAccountByAccountNumber_returnsAccountWhenFound()" classname="com.martianbank.loan.repository.AccountsRepositoryTest" time="0.014"/>
+  <testcase name="getAccountByAccountNumber_returnsNullWhenNotFound()" classname="com.martianbank.loan.repository.AccountsRepositoryTest" time="0.003"/>
+  <system-out><![CDATA[2026-01-14 17:06:16,544 DEBUG [com.mar.loa.rep.AccountsRepository] (Test worker) Updated balance for account 12345 to 2000.000000
+2026-01-14 17:06:16,573 DEBUG [com.mar.loa.rep.AccountsRepository] (Test worker) Found account: 12345
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

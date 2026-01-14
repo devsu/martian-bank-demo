@@ -145,7 +145,7 @@ public class LoanService {
 ## Success Criteria:
 
 ### Automated Verification:
-- [ ] Build succeeds: `cd loan-java && ./gradlew compileJava`
-- [ ] No compilation errors in service class
+- [x] Build succeeds: `cd loan-java && ./gradlew compileJava`
+- [x] No compilation errors in service class
 
 **Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 3.5 for testing.

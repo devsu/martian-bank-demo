@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.martianbank.loan.service.LoanServiceTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-01-14T20:06:16.633Z" hostname="hector.brito" time="0.096">
+  <properties/>
+  <testcase name="processLoanRequest_rejectsWhenAccountNotFound()" classname="com.martianbank.loan.service.LoanServiceTest" time="0.068"/>
+  <testcase name="processLoanRequest_rejectsWhenAmountIsZero()" classname="com.martianbank.loan.service.LoanServiceTest" time="0.002"/>
+  <testcase name="processLoanRequest_rejectsWhenAmountBelowOne()" classname="com.martianbank.loan.service.LoanServiceTest" time="0.003"/>
+  <testcase name="processLoanRequest_rejectsWhenAmountIsNegative()" classname="com.martianbank.loan.service.LoanServiceTest" time="0.004"/>
+  <testcase name="processLoanRequest_approvesLoanWhenAccountExistsAndAmountValid()" classname="com.martianbank.loan.service.LoanServiceTest" time="0.002"/>
+  <testcase name="getLoanHistory_returnsLoansFromRepository()" classname="com.martianbank.loan.service.LoanServiceTest" time="0.002"/>
+  <testcase name="processLoanRequest_setsTimestampOnLoan()" classname="com.martianbank.loan.service.LoanServiceTest" time="0.003"/>
+  <testcase name="processLoanRequest_approvesWhenAmountIsExactlyOne()" classname="com.martianbank.loan.service.LoanServiceTest" time="0.003"/>
+  <testcase name="processLoanRequest_savesLoanWithApprovedStatus()" classname="com.martianbank.loan.service.LoanServiceTest" time="0.003"/>
+  <testcase name="processLoanRequest_savesLoanWithDeclinedStatus()" classname="com.martianbank.loan.service.LoanServiceTest" time="0.003"/>
+  <testcase name="getLoanHistory_returnsEmptyListWhenNoLoans()" classname="com.martianbank.loan.service.LoanServiceTest" time="0.002"/>
+  <system-out><![CDATA[2026-01-14 17:06:16,700 DEBUG [com.mar.loa.ser.LoanService] (Test worker) user account only based on account number search : com.martianbank.loan.model.AccountDocument@528f5a50
+2026-01-14 17:06:16,700 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Count whether the email and account exist or not : 0
+2026-01-14 17:06:16,702 DEBUG [com.mar.loa.ser.LoanService] (Test worker) user account only based on account number search : com.martianbank.loan.model.AccountDocument@6fd1a7c9
+2026-01-14 17:06:16,703 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Count whether the email and account exist or not : 1
+2026-01-14 17:06:16,703 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Result false
+2026-01-14 17:06:16,703 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Account: 12345
+2026-01-14 17:06:16,703 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Response: com.martianbank.loan.model.LoanResponseDto@aa43edc
+2026-01-14 17:06:16,705 DEBUG [com.mar.loa.ser.LoanService] (Test worker) user account only based on account number search : com.martianbank.loan.model.AccountDocument@4b37b02a
+2026-01-14 17:06:16,705 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Count whether the email and account exist or not : 1
+2026-01-14 17:06:16,705 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Result false
+2026-01-14 17:06:16,705 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Account: 12345
+2026-01-14 17:06:16,705 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Response: com.martianbank.loan.model.LoanResponseDto@17171d41
+2026-01-14 17:06:16,708 DEBUG [com.mar.loa.ser.LoanService] (Test worker) user account only based on account number search : com.martianbank.loan.model.AccountDocument@598e47eb
+2026-01-14 17:06:16,709 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Count whether the email and account exist or not : 1
+2026-01-14 17:06:16,709 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Result false
+2026-01-14 17:06:16,709 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Account: 12345
+2026-01-14 17:06:16,710 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Response: com.martianbank.loan.model.LoanResponseDto@4a58ba89
+2026-01-14 17:06:16,712 DEBUG [com.mar.loa.ser.LoanService] (Test worker) user account only based on account number search : com.martianbank.loan.model.AccountDocument@49e825a8
+2026-01-14 17:06:16,712 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Count whether the email and account exist or not : 1
+2026-01-14 17:06:16,712 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Result true
+2026-01-14 17:06:16,713 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Account: 12345
+2026-01-14 17:06:16,713 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Response: com.martianbank.loan.model.LoanResponseDto@65382d45
+2026-01-14 17:06:16,717 DEBUG [com.mar.loa.ser.LoanService] (Test worker) user account only based on account number search : com.martianbank.loan.model.AccountDocument@5378b5ec
+2026-01-14 17:06:16,717 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Count whether the email and account exist or not : 1
+2026-01-14 17:06:16,717 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Result true
+2026-01-14 17:06:16,717 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Account: 12345
+2026-01-14 17:06:16,718 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Response: com.martianbank.loan.model.LoanResponseDto@6e98de91
+2026-01-14 17:06:16,720 DEBUG [com.mar.loa.ser.LoanService] (Test worker) user account only based on account number search : com.martianbank.loan.model.AccountDocument@4eed8ede
+2026-01-14 17:06:16,720 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Count whether the email and account exist or not : 1
+2026-01-14 17:06:16,720 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Result true
+2026-01-14 17:06:16,720 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Account: 12345
+2026-01-14 17:06:16,720 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Response: com.martianbank.loan.model.LoanResponseDto@1b99a5ac
+2026-01-14 17:06:16,723 DEBUG [com.mar.loa.ser.LoanService] (Test worker) user account only based on account number search : com.martianbank.loan.model.AccountDocument@e00498a
+2026-01-14 17:06:16,723 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Count whether the email and account exist or not : 1
+2026-01-14 17:06:16,723 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Result true
+2026-01-14 17:06:16,723 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Account: 12345
+2026-01-14 17:06:16,723 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Response: com.martianbank.loan.model.LoanResponseDto@39ff3add
+2026-01-14 17:06:16,726 DEBUG [com.mar.loa.ser.LoanService] (Test worker) user account only based on account number search : com.martianbank.loan.model.AccountDocument@24c9fa8e
+2026-01-14 17:06:16,726 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Count whether the email and account exist or not : 1
+2026-01-14 17:06:16,726 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Result false
+2026-01-14 17:06:16,726 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Account: 12345
+2026-01-14 17:06:16,726 DEBUG [com.mar.loa.ser.LoanService] (Test worker) Response: com.martianbank.loan.model.LoanResponseDto@2f0990db
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

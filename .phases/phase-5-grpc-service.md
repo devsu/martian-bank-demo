@@ -111,8 +111,8 @@ public class LoanGrpcService extends LoanServiceGrpc.LoanServiceImplBase {
 ## Success Criteria:
 
 ### Automated Verification:
-- [ ] Build succeeds with gRPC code generation: `cd loan-java && ./gradlew build`
-- [ ] Application starts with gRPC enabled: `cd loan-java && ./gradlew quarkusDev`
-- [ ] gRPC reflection works: `grpcurl -plaintext localhost:50053 list`
+- [x] Build succeeds with gRPC code generation: `cd loan-java && ./gradlew build`
+- [x] Application starts with gRPC enabled: `cd loan-java && ./gradlew quarkusDev`
+- [x] gRPC reflection works: `grpcurl -plaintext localhost:50053 list`
 
 **Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 5.5 for testing.

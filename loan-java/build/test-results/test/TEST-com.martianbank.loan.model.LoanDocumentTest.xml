@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.martianbank.loan.model.LoanDocumentTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-01-14T20:06:15.990Z" hostname="hector.brito" time="0.049">
+  <properties/>
+  <testcase name="allFieldsSerializeCorrectly()" classname="com.martianbank.loan.model.LoanDocumentTest" time="0.047"/>
+  <testcase name="timestampReturnsNullWhenNotSet()" classname="com.martianbank.loan.model.LoanDocumentTest" time="0.001"/>
+  <testcase name="timestampReturnsStringFormat()" classname="com.martianbank.loan.model.LoanDocumentTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

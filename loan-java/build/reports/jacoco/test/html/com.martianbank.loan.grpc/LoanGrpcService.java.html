@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoanGrpcService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">loan-java</a> &gt; <a href="index.source.html" class="el_package">com.martianbank.loan.grpc</a> &gt; <span class="el_source">LoanGrpcService.java</span></div><h1>LoanGrpcService.java</h1><pre class="source lang-java linenums">package com.martianbank.loan.grpc;
+
+import com.martianbank.loan.model.*;
+import com.martianbank.loan.service.LoanService;
+import io.grpc.stub.StreamObserver;
+import io.quarkus.grpc.GrpcService;
+import jakarta.inject.Inject;
+import org.jboss.logging.Logger;
+
+import java.util.List;
+
+/**
+ * gRPC service implementation
+ * Exact replica of Python LoanService class
+ * Reference: loan/loan.py:145-180
+ */
+@GrpcService
+<span class="fc" id="L18">public class LoanGrpcService extends LoanServiceGrpc.LoanServiceImplBase {</span>
+
+<span class="fc" id="L20">    private static final Logger LOG = Logger.getLogger(LoanGrpcService.class);</span>
+
+    @Inject
+    LoanService loanService;
+
+    /**
+     * Process loan request via gRPC
+     * Exact replica of Python: LoanService.ProcessLoanRequest()
+     * Reference: loan/loan.py:151-167
+     */
+    @Override
+    public void processLoanRequest(LoanProto.LoanRequest request, StreamObserver&lt;LoanProto.LoanResponse&gt; responseObserver) {
+        // Extract fields from gRPC request (matches Python: loan.py:152-161)
+<span class="fc" id="L33">        LoanRequestDto dto = new LoanRequestDto();</span>
+<span class="fc" id="L34">        dto.setName(request.getName());</span>
+<span class="fc" id="L35">        dto.setEmail(request.getEmail());</span>
+<span class="fc" id="L36">        dto.setAccountType(request.getAccountType());</span>
+<span class="fc" id="L37">        dto.setAccountNumber(request.getAccountNumber());</span>
+<span class="fc" id="L38">        dto.setGovtIdType(request.getGovtIdType());</span>
+<span class="fc" id="L39">        dto.setGovtIdNumber(request.getGovtIdNumber());</span>
+<span class="fc" id="L40">        dto.setLoanType(request.getLoanType());</span>
+<span class="fc" id="L41">        dto.setLoanAmount(request.getLoanAmount());</span>
+<span class="fc" id="L42">        dto.setInterestRate(request.getInterestRate());</span>
+<span class="fc" id="L43">        dto.setTimePeriod(request.getTimePeriod());</span>
+
+        // Process loan request using shared business logic
+        // Matches Python: loan.py:164
+<span class="fc" id="L47">        LoanResponseDto result = loanService.processLoanRequest(dto);</span>
+
+        // Build gRPC response (matches Python: loan.py:166)
+<span class="fc" id="L50">        LoanProto.LoanResponse response = LoanProto.LoanResponse.newBuilder()</span>
+<span class="fc" id="L51">            .setApproved(result.isApproved())</span>
+<span class="fc" id="L52">            .setMessage(result.getMessage())</span>
+<span class="fc" id="L53">            .build();</span>
+
+<span class="fc" id="L55">        responseObserver.onNext(response);</span>
+<span class="fc" id="L56">        responseObserver.onCompleted();</span>
+<span class="fc" id="L57">    }</span>
+
+    /**
+     * Get loan history via gRPC
+     * Exact replica of Python: LoanService.getLoanHistory()
+     * Reference: loan/loan.py:169-180
+     */
+    @Override
+    public void getLoanHistory(LoanProto.LoansHistoryRequest request, StreamObserver&lt;LoanProto.LoansHistoryResponse&gt; responseObserver) {
+        // Extract email from request (matches Python: loan.py:171)
+<span class="fc" id="L67">        String email = request.getEmail();</span>
+
+        // Get loan history using shared business logic
+        // Matches Python: loan.py:175
+<span class="fc" id="L71">        List&lt;LoanDocument&gt; loans = loanService.getLoanHistory(email);</span>
+
+        // Build gRPC response (matches Python: loan.py:177-180)
+<span class="fc" id="L74">        LoanProto.LoansHistoryResponse.Builder responseBuilder = LoanProto.LoansHistoryResponse.newBuilder();</span>
+
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        for (LoanDocument loan : loans) {</span>
+<span class="fc" id="L77">            LoanProto.Loan grpcLoan = LoanProto.Loan.newBuilder()</span>
+<span class="fc" id="L78">                .setName(loan.getName())</span>
+<span class="fc" id="L79">                .setEmail(loan.getEmail())</span>
+<span class="fc" id="L80">                .setAccountType(loan.getAccountType())</span>
+<span class="fc" id="L81">                .setAccountNumber(loan.getAccountNumber())</span>
+<span class="fc" id="L82">                .setGovtIdType(loan.getGovtIdType())</span>
+<span class="fc" id="L83">                .setGovtIdNumber(loan.getGovtIdNumber())</span>
+<span class="fc" id="L84">                .setLoanType(loan.getLoanType())</span>
+<span class="fc" id="L85">                .setLoanAmount(loan.getLoanAmount())</span>
+<span class="fc" id="L86">                .setInterestRate(loan.getInterestRate())</span>
+<span class="fc" id="L87">                .setTimePeriod(loan.getTimePeriod())</span>
+<span class="fc" id="L88">                .setStatus(loan.getStatus())</span>
+<span class="fc" id="L89">                .setTimestamp(loan.getTimestamp())</span>
+<span class="fc" id="L90">                .build();</span>
+<span class="fc" id="L91">            responseBuilder.addLoans(grpcLoan);</span>
+<span class="fc" id="L92">        }</span>
+
+<span class="fc" id="L94">        responseObserver.onNext(responseBuilder.build());</span>
+<span class="fc" id="L95">        responseObserver.onCompleted();</span>
+<span class="fc" id="L96">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

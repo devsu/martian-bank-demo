@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoanService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">loan-java</a> &gt; <a href="index.source.html" class="el_package">com.martianbank.loan.service</a> &gt; <span class="el_source">LoanService.java</span></div><h1>LoanService.java</h1><pre class="source lang-java linenums">package com.martianbank.loan.service;
+
+import com.martianbank.loan.model.*;
+import com.martianbank.loan.repository.AccountsRepository;
+import com.martianbank.loan.repository.LoansRepository;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import org.jboss.logging.Logger;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * Core loan business logic - exact replica of Python LoanGeneric class
+ * Reference: loan/loan.py:48-143
+ */
+@ApplicationScoped
+<span class="fc" id="L18">public class LoanService {</span>
+
+<span class="fc" id="L20">    private static final Logger LOG = Logger.getLogger(LoanService.class);</span>
+
+    @Inject
+    AccountsRepository accountsRepository;
+
+    @Inject
+    LoansRepository loansRepository;
+
+    /**
+     * Process a loan request
+     * Exact replica of Python: LoanGeneric.ProcessLoanRequest()
+     * Reference: loan/loan.py:49-95
+     */
+    public LoanResponseDto processLoanRequest(LoanRequestDto request) {
+<span class="fc" id="L34">        String name = request.getName();</span>
+<span class="fc" id="L35">        String email = request.getEmail();</span>
+<span class="fc" id="L36">        String accountType = request.getAccountType();</span>
+<span class="fc" id="L37">        String accountNumber = request.getAccountNumber();</span>
+<span class="fc" id="L38">        String govtIdType = request.getGovtIdType();</span>
+<span class="fc" id="L39">        String govtIdNumber = request.getGovtIdNumber();</span>
+<span class="fc" id="L40">        String loanType = request.getLoanType();</span>
+<span class="fc" id="L41">        double loanAmount = request.getLoanAmount();</span>
+<span class="fc" id="L42">        double interestRate = request.getInterestRate();</span>
+<span class="fc" id="L43">        String timePeriod = request.getTimePeriod();</span>
+
+        // Get account by account number (matches Python __getAccount)
+<span class="fc" id="L46">        AccountDocument userAccount = accountsRepository.getAccountByAccountNumber(accountNumber);</span>
+
+        // Count matching accounts by email_id AND account_number
+        // Matches Python: collection_accounts.count_documents({&quot;email_id&quot;: email, 'account_number': account_number})
+<span class="fc" id="L50">        long count = accountsRepository.countByEmailIdAndAccountNumber(email, accountNumber);</span>
+
+<span class="fc" id="L52">        LOG.debugf(&quot;user account only based on account number search : %s&quot;, userAccount);</span>
+<span class="fc" id="L53">        LOG.debugf(&quot;Count whether the email and account exist or not : %d&quot;, count);</span>
+
+        // Validation: check if account exists
+        // Matches Python: loan.py:67-68
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        if (count == 0) {</span>
+<span class="fc" id="L58">            return new LoanResponseDto(false, &quot;Email or Account number not found.&quot;);</span>
+        }
+
+        // Approve loan (includes balance update)
+        // Matches Python: loan.py:69
+<span class="fc" id="L63">        boolean result = approveLoan(userAccount, loanAmount);</span>
+<span class="fc" id="L64">        LOG.debugf(&quot;Result %b&quot;, result);</span>
+
+        // Set message based on result
+        // Matches Python: loan.py:71
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        String message = result ? &quot;Loan Approved&quot; : &quot;Loan Rejected&quot;;</span>
+
+        // Create loan document
+        // Matches Python: loan.py:74-88
+<span class="fc" id="L72">        LoanDocument loanDocument = new LoanDocument();</span>
+<span class="fc" id="L73">        loanDocument.setName(name);</span>
+<span class="fc" id="L74">        loanDocument.setEmail(email);</span>
+<span class="fc" id="L75">        loanDocument.setAccountType(accountType);</span>
+<span class="fc" id="L76">        loanDocument.setAccountNumber(accountNumber);</span>
+<span class="fc" id="L77">        loanDocument.setGovtIdType(govtIdType);</span>
+<span class="fc" id="L78">        loanDocument.setGovtIdNumber(govtIdNumber);</span>
+<span class="fc" id="L79">        loanDocument.setLoanType(loanType);</span>
+<span class="fc" id="L80">        loanDocument.setLoanAmount(loanAmount);</span>
+<span class="fc" id="L81">        loanDocument.setInterestRate(interestRate);</span>
+<span class="fc" id="L82">        loanDocument.setTimePeriod(timePeriod);</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        loanDocument.setStatus(result ? &quot;Approved&quot; : &quot;Declined&quot;);</span>
+<span class="fc" id="L84">        loanDocument.setTimestampDate(LocalDateTime.now());</span>
+
+        // Insert loan into database
+        // Matches Python: loan.py:90
+<span class="fc" id="L88">        loansRepository.insertLoan(loanDocument);</span>
+
+        // Create response
+        // Matches Python: loan.py:92-95
+<span class="fc" id="L92">        LoanResponseDto response = new LoanResponseDto(result, message);</span>
+<span class="fc" id="L93">        LOG.debugf(&quot;Account: %s&quot;, accountNumber);</span>
+<span class="fc" id="L94">        LOG.debugf(&quot;Response: %s&quot;, response);</span>
+
+<span class="fc" id="L96">        return response;</span>
+    }
+
+    /**
+     * Get loan history by email
+     * Exact replica of Python: LoanGeneric.getLoanHistory()
+     * Reference: loan/loan.py:97-120
+     */
+    public List&lt;LoanDocument&gt; getLoanHistory(String email) {
+<span class="fc" id="L105">        return loansRepository.findByEmail(email);</span>
+    }
+
+    /**
+     * Approve loan and update account balance
+     * Exact replica of Python: LoanGeneric.__approveLoan()
+     * Reference: loan/loan.py:132-143
+     */
+    private boolean approveLoan(AccountDocument account, double amount) {
+        // Validation: amount must be &gt;= 1
+        // Matches Python: loan.py:133-134
+<span class="fc bfc" id="L116" title="All 2 branches covered.">        if (amount &lt; 1) {</span>
+<span class="fc" id="L117">            return false;</span>
+        }
+
+        // Add loan amount to balance
+        // Matches Python: loan.py:136
+<span class="fc" id="L122">        double newBalance = account.getBalance() + amount;</span>
+
+        // Update account in database
+        // Matches Python: loan.py:138-141
+<span class="fc" id="L126">        accountsRepository.updateBalance(account.getAccountNumber(), newBalance);</span>
+
+        // Matches Python: loan.py:143
+<span class="fc" id="L129">        return true;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

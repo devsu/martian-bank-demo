@@ -1,0 +1,81 @@
+plugins {
+    id 'java'
+    id 'io.quarkus' version '3.29.0'
+    id 'jacoco'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
+
+    // REST API
+    implementation 'io.quarkus:quarkus-rest'
+    implementation 'io.quarkus:quarkus-rest-jackson'
+
+    // gRPC
+    implementation 'io.quarkus:quarkus-grpc'
+
+    // MongoDB
+    implementation 'io.quarkus:quarkus-mongodb-client'
+
+    // Health checks
+    implementation 'io.quarkus:quarkus-smallrye-health'
+
+    // Arc (CDI)
+    implementation 'io.quarkus:quarkus-arc'
+
+    // Testing
+    testImplementation 'io.quarkus:quarkus-junit5'
+    testImplementation 'io.quarkus:quarkus-junit5-mockito'
+    testImplementation 'io.rest-assured:rest-assured'
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.14.2'
+    testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+test {
+    systemProperty 'java.util.logging.manager', 'org.jboss.logmanager.LogManager'
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.90
+            }
+        }
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                // Exclude main class - static main method is bootstrap only
+                '**/LoanApplication.class',
+                // Exclude generated gRPC/protobuf classes
+                '**/grpc/**'
+            ])
+        }))
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs.add('-parameters')
+}

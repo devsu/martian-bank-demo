@@ -65,7 +65,7 @@ public class LoanResource {
 ## Success Criteria:
 
 ### Automated Verification:
-- [ ] Build succeeds: `cd loan-java && ./gradlew compileJava`
+- [x] Build succeeds: `cd loan-java && ./gradlew compileJava`
 - [ ] Application starts: `cd loan-java && ./gradlew quarkusDev`
 - [ ] Endpoint responds: `curl -X POST http://localhost:50053/loan/request -H "Content-Type: application/json" -d '{"name":"test","email":"test@test.com","account_type":"savings","account_number":"123","govt_id_type":"passport","govt_id_number":"ABC123","loan_type":"personal","loan_amount":100,"interest_rate":5.5,"time_period":"12 months"}'`
 

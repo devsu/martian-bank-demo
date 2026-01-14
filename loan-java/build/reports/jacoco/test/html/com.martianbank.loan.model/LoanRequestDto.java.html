@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoanRequestDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">loan-java</a> &gt; <a href="index.source.html" class="el_package">com.martianbank.loan.model</a> &gt; <span class="el_source">LoanRequestDto.java</span></div><h1>LoanRequestDto.java</h1><pre class="source lang-java linenums">package com.martianbank.loan.model;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+<span class="fc" id="L5">public class LoanRequestDto {</span>
+
+    @JsonProperty(&quot;name&quot;)
+    private String name;
+
+    @JsonProperty(&quot;email&quot;)
+    private String email;
+
+    @JsonProperty(&quot;account_type&quot;)
+    private String accountType;
+
+    @JsonProperty(&quot;account_number&quot;)
+    private String accountNumber;
+
+    @JsonProperty(&quot;govt_id_type&quot;)
+    private String govtIdType;
+
+    @JsonProperty(&quot;govt_id_number&quot;)
+    private String govtIdNumber;
+
+    @JsonProperty(&quot;loan_type&quot;)
+    private String loanType;
+
+    @JsonProperty(&quot;loan_amount&quot;)
+    private double loanAmount;
+
+    @JsonProperty(&quot;interest_rate&quot;)
+    private double interestRate;
+
+    @JsonProperty(&quot;time_period&quot;)
+    private String timePeriod;
+
+    // Getters and Setters
+<span class="fc" id="L38">    public String getName() { return name; }</span>
+<span class="fc" id="L39">    public void setName(String name) { this.name = name; }</span>
+
+<span class="fc" id="L41">    public String getEmail() { return email; }</span>
+<span class="fc" id="L42">    public void setEmail(String email) { this.email = email; }</span>
+
+<span class="fc" id="L44">    public String getAccountType() { return accountType; }</span>
+<span class="fc" id="L45">    public void setAccountType(String accountType) { this.accountType = accountType; }</span>
+
+<span class="fc" id="L47">    public String getAccountNumber() { return accountNumber; }</span>
+<span class="fc" id="L48">    public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }</span>
+
+<span class="fc" id="L50">    public String getGovtIdType() { return govtIdType; }</span>
+<span class="fc" id="L51">    public void setGovtIdType(String govtIdType) { this.govtIdType = govtIdType; }</span>
+
+<span class="fc" id="L53">    public String getGovtIdNumber() { return govtIdNumber; }</span>
+<span class="fc" id="L54">    public void setGovtIdNumber(String govtIdNumber) { this.govtIdNumber = govtIdNumber; }</span>
+
+<span class="fc" id="L56">    public String getLoanType() { return loanType; }</span>
+<span class="fc" id="L57">    public void setLoanType(String loanType) { this.loanType = loanType; }</span>
+
+<span class="fc" id="L59">    public double getLoanAmount() { return loanAmount; }</span>
+<span class="fc" id="L60">    public void setLoanAmount(double loanAmount) { this.loanAmount = loanAmount; }</span>
+
+<span class="fc" id="L62">    public double getInterestRate() { return interestRate; }</span>
+<span class="fc" id="L63">    public void setInterestRate(double interestRate) { this.interestRate = interestRate; }</span>
+
+<span class="fc" id="L65">    public String getTimePeriod() { return timePeriod; }</span>
+<span class="fc" id="L66">    public void setTimePeriod(String timePeriod) { this.timePeriod = timePeriod; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.martianbank.loan.model.LoanRequestDtoTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-01-14T20:06:16.067Z" hostname="hector.brito" time="0.011">
+  <properties/>
+  <testcase name="serializesToJsonWithCorrectFieldNames()" classname="com.martianbank.loan.model.LoanRequestDtoTest" time="0.002"/>
+  <testcase name="deserializesFromJsonWithSnakeCaseFields()" classname="com.martianbank.loan.model.LoanRequestDtoTest" time="0.008"/>
+  <testcase name="gettersAndSettersWorkCorrectly()" classname="com.martianbank.loan.model.LoanRequestDtoTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

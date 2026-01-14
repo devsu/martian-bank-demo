@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AccountsRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">loan-java</a> &gt; <a href="index.source.html" class="el_package">com.martianbank.loan.repository</a> &gt; <span class="el_source">AccountsRepository.java</span></div><h1>AccountsRepository.java</h1><pre class="source lang-java linenums">package com.martianbank.loan.repository;
+
+import com.martianbank.loan.model.AccountDocument;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import org.bson.Document;
+import org.jboss.logging.Logger;
+
+@ApplicationScoped
+<span class="fc" id="L14">public class AccountsRepository {</span>
+
+<span class="fc" id="L16">    private static final Logger LOG = Logger.getLogger(AccountsRepository.class);</span>
+
+    @Inject
+    MongoClient mongoClient;
+
+    private MongoCollection&lt;Document&gt; getCollection() {
+<span class="fc" id="L22">        return mongoClient.getDatabase(&quot;bank&quot;).getCollection(&quot;accounts&quot;);</span>
+    }
+
+    /**
+     * Count documents matching email_id AND account_number
+     * Matches Python: collection_accounts.count_documents({&quot;email_id&quot;: email, 'account_number': account_number})
+     */
+    public long countByEmailIdAndAccountNumber(String emailId, String accountNumber) {
+<span class="fc" id="L30">        return getCollection().countDocuments(</span>
+<span class="fc" id="L31">            Filters.and(</span>
+<span class="fc" id="L32">                Filters.eq(&quot;email_id&quot;, emailId),</span>
+<span class="fc" id="L33">                Filters.eq(&quot;account_number&quot;, accountNumber)</span>
+            )
+        );
+    }
+
+    /**
+     * Get account by account number (scans all accounts like Python does)
+     * Matches Python: Linear search through collection_accounts.find()
+     */
+    public AccountDocument getAccountByAccountNumber(String accountNumber) {
+        // Replicating Python's inefficient full scan behavior
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        for (Document doc : getCollection().find()) {</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">            if (accountNumber.equals(doc.getString(&quot;account_number&quot;))) {</span>
+<span class="fc" id="L46">                AccountDocument account = new AccountDocument();</span>
+<span class="fc" id="L47">                account.setAccountNumber(doc.getString(&quot;account_number&quot;));</span>
+<span class="fc" id="L48">                account.setEmailId(doc.getString(&quot;email_id&quot;));</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">                account.setBalance(doc.getDouble(&quot;balance&quot;) != null ? doc.getDouble(&quot;balance&quot;) : 0.0);</span>
+<span class="fc" id="L50">                account.setName(doc.getString(&quot;name&quot;));</span>
+<span class="fc" id="L51">                account.setAccountType(doc.getString(&quot;account_type&quot;));</span>
+<span class="fc" id="L52">                LOG.debugf(&quot;Found account: %s&quot;, accountNumber);</span>
+<span class="fc" id="L53">                return account;</span>
+            }
+<span class="nc" id="L55">        }</span>
+<span class="fc" id="L56">        return null;</span>
+    }
+
+    /**
+     * Update account balance
+     * Matches Python: collection_accounts.update_one({&quot;account_number&quot;: ...}, {&quot;$set&quot;: {&quot;balance&quot;: ...}})
+     */
+    public void updateBalance(String accountNumber, double newBalance) {
+<span class="fc" id="L64">        getCollection().updateOne(</span>
+<span class="fc" id="L65">            Filters.eq(&quot;account_number&quot;, accountNumber),</span>
+<span class="fc" id="L66">            Updates.set(&quot;balance&quot;, newBalance)</span>
+        );
+<span class="fc" id="L68">        LOG.debugf(&quot;Updated balance for account %s to %f&quot;, accountNumber, newBalance);</span>
+<span class="fc" id="L69">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

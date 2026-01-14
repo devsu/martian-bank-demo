@@ -114,6 +114,22 @@ services:
     networks:
       - bankapp-network
 
+  loan-java:
+    build:
+      context: ./loan-java
+      dockerfile: Dockerfile
+    container_name: loan-java
+    hostname: loan
+    image: martian-bank-loan-java
+    restart: always
+    environment:
+      DB_URL: mongodb://root:example@mongo:27017
+      SERVICE_PROTOCOL: http
+    networks:
+      - bankapp-network
+    profiles:
+      - java
+
   transactions:
     build:
       context: .

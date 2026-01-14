@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.martianbank.loan.resource.LoanResourceTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-01-14T20:06:13.441Z" hostname="hector.brito" time="2.089">
+  <properties/>
+  <testcase name="processLoanRequest_endpointPathIsCorrect()" classname="com.martianbank.loan.resource.LoanResourceTest" time="1.374"/>
+  <testcase name="processLoanRequest_returnsApprovedResponse()" classname="com.martianbank.loan.resource.LoanResourceTest" time="0.449"/>
+  <testcase name="processLoanRequest_callsServiceWithCorrectDto()" classname="com.martianbank.loan.resource.LoanResourceTest" time="0.028"/>
+  <testcase name="getLoanHistory_returnsLoansArray()" classname="com.martianbank.loan.resource.LoanResourceTest" time="0.132"/>
+  <testcase name="processLoanRequest_returnsRejectedResponse()" classname="com.martianbank.loan.resource.LoanResourceTest" time="0.036"/>
+  <testcase name="getLoanHistory_returnsEmptyArrayWhenNoLoans()" classname="com.martianbank.loan.resource.LoanResourceTest" time="0.014"/>
+  <testcase name="getLoanHistory_endpointPathIsCorrect()" classname="com.martianbank.loan.resource.LoanResourceTest" time="0.013"/>
+  <testcase name="getLoanHistory_returnsMultipleLoans()" classname="com.martianbank.loan.resource.LoanResourceTest" time="0.032"/>
+  <system-out><![CDATA[2026-01-14 17:06:14,728 DEBUG [com.mar.loa.res.LoanResource] (executor-thread-1) Request: com.martianbank.loan.model.LoanRequestDto@34c463b7
+2026-01-14 17:06:14,833 DEBUG [com.mar.loa.res.LoanResource] (executor-thread-1) Request: com.martianbank.loan.model.LoanRequestDto@44a2bee4
+2026-01-14 17:06:15,281 DEBUG [com.mar.loa.res.LoanResource] (executor-thread-1) Request: com.martianbank.loan.model.LoanRequestDto@7409b549
+2026-01-14 17:06:15,320 DEBUG [com.mar.loa.res.LoanResource] (executor-thread-1) ----------------> Request: /loan/history
+2026-01-14 17:06:15,320 DEBUG [com.mar.loa.res.LoanResource] (executor-thread-1) Request: com.martianbank.loan.model.LoanHistoryRequestDto@33aed8b
+2026-01-14 17:06:15,445 DEBUG [com.mar.loa.res.LoanResource] (executor-thread-1) Request: com.martianbank.loan.model.LoanRequestDto@32c384ae
+2026-01-14 17:06:15,479 DEBUG [com.mar.loa.res.LoanResource] (executor-thread-1) ----------------> Request: /loan/history
+2026-01-14 17:06:15,479 DEBUG [com.mar.loa.res.LoanResource] (executor-thread-1) Request: com.martianbank.loan.model.LoanHistoryRequestDto@6e2869dc
+2026-01-14 17:06:15,495 DEBUG [com.mar.loa.res.LoanResource] (executor-thread-1) ----------------> Request: /loan/history
+2026-01-14 17:06:15,495 DEBUG [com.mar.loa.res.LoanResource] (executor-thread-1) Request: com.martianbank.loan.model.LoanHistoryRequestDto@76b01435
+2026-01-14 17:06:15,509 DEBUG [com.mar.loa.res.LoanResource] (executor-thread-1) ----------------> Request: /loan/history
+2026-01-14 17:06:15,509 DEBUG [com.mar.loa.res.LoanResource] (executor-thread-1) Request: com.martianbank.loan.model.LoanHistoryRequestDto@1ab73a23
+]]></system-out>
+  <system-err><![CDATA[Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (/home/hector-brito/.gradle/caches/modules-2/files-2.1/net.bytebuddy/byte-buddy-agent/1.17.7/fbf3d6d649ed37fc9e9c59480a05be0a26e3c2da/byte-buddy-agent-1.17.7.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+]]></system-err>
+</testsuite>
