@@ -2,8 +2,6 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-version: "3.9"
-
 services:
   mongo:
       image: mongo
@@ -83,6 +81,7 @@ services:
       context: .
       dockerfile: dashboard/Dockerfile
     environment:
+      DB_URL: mongodb://root:example@mongo:27017
       ACCOUNT_HOST: accounts
       TRANSACTION_HOST: transactions
       LOAN_HOST: loan
@@ -97,6 +96,8 @@ services:
     hostname: accounts
     image: martian-bank-accounts
     restart: always
+    environment:
+      DB_URL: mongodb://root:example@mongo:27017
     networks:
       - bankapp-network
 
@@ -108,6 +109,8 @@ services:
     hostname: loan
     image: martian-bank-loan
     restart: always
+    environment:
+      DB_URL: mongodb://root:example@mongo:27017
     networks:
       - bankapp-network
 
@@ -119,6 +122,8 @@ services:
     hostname: martian-bank-transactions
     image: martian-bank-transactions
     restart: always
+    environment:
+      DB_URL: mongodb://root:example@mongo:27017
     networks:
       - bankapp-network 
 
