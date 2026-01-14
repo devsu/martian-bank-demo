@@ -411,11 +411,6 @@ public class LoanApplication {
 - [ ] Proto files compile: `cd loan-java && ./gradlew quarkusGenerateCode`
 - [ ] Application starts without errors: `cd loan-java && ./gradlew quarkusDev`
 
-#### Manual Verification:
-- [ ] Project structure matches the specified layout
-- [ ] All configuration files are in place
-- [ ] No compilation errors in IDE
-
 **Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 1.5 for testing.
 
 ---
@@ -497,12 +492,7 @@ quarkus.log.category."com.martianbank".level=DEBUG
 - [ ] Coverage report generated: `cd loan-java && ./gradlew jacocoTestReport`
 - [ ] Phase 1 code coverage ≥ 90%: `cd loan-java && ./gradlew jacocoTestCoverageVerification`
 
-#### Manual Verification:
-- [ ] Test report viewable at `loan-java/build/reports/tests/test/index.html`
-- [ ] Coverage report viewable at `loan-java/build/reports/jacoco/test/html/index.html`
-- [ ] LoanApplication class shows ≥ 90% line coverage
-
-**Implementation Note**: After completing this phase and all automated verification passes, pause here for manual confirmation before proceeding to Phase 2.
+**Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 2.
 
 ---
 
@@ -955,11 +945,6 @@ public class LoansRepository {
 #### Automated Verification:
 - [ ] Build succeeds with all model classes: `cd loan-java && ./gradlew compileJava`
 - [ ] No compilation errors
-
-#### Manual Verification:
-- [ ] Model field names match MongoDB document structure (snake_case)
-- [ ] JSON annotations produce correct field names in responses
-- [ ] Repository query logic matches Python implementation exactly
 
 **Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 2.5 for testing.
 
@@ -1511,12 +1496,7 @@ class LoansRepositoryTest {
 - [ ] Repository classes achieve ≥ 90% line coverage
 - [ ] Coverage threshold passes: `cd loan-java && ./gradlew jacocoTestCoverageVerification`
 
-#### Manual Verification:
-- [ ] All model tests verify JSON serialization with snake_case field names
-- [ ] Repository tests verify correct MongoDB query construction
-- [ ] Mocks properly isolate tests from actual database
-
-**Implementation Note**: After completing this phase and all automated verification passes, pause here for manual confirmation before proceeding to Phase 3.
+**Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 3.
 
 ---
 
@@ -1669,11 +1649,6 @@ public class LoanService {
 #### Automated Verification:
 - [ ] Build succeeds: `cd loan-java && ./gradlew compileJava`
 - [ ] No compilation errors in service class
-
-#### Manual Verification:
-- [ ] Business logic flow matches Python implementation exactly
-- [ ] Log messages match Python log format
-- [ ] Approval condition (amount >= 1) matches Python
 
 **Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 3.5 for testing.
 
@@ -1899,12 +1874,7 @@ class LoanServiceTest {
 - [ ] LoanService class achieves ≥ 90% line coverage
 - [ ] Coverage threshold passes: `cd loan-java && ./gradlew jacocoTestCoverageVerification`
 
-#### Manual Verification:
-- [ ] Tests cover all business logic branches (approval, rejection reasons)
-- [ ] Tests verify exact behavior match with Python implementation
-- [ ] All repository interactions are properly verified
-
-**Implementation Note**: After completing this phase and all automated verification passes, pause here for manual confirmation before proceeding to Phase 4.
+**Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 4.
 
 ---
 
@@ -1978,11 +1948,6 @@ public class LoanResource {
 - [ ] Build succeeds: `cd loan-java && ./gradlew compileJava`
 - [ ] Application starts: `cd loan-java && ./gradlew quarkusDev`
 - [ ] Endpoint responds: `curl -X POST http://localhost:50053/loan/request -H "Content-Type: application/json" -d '{"name":"test","email":"test@test.com","account_type":"savings","account_number":"123","govt_id_type":"passport","govt_id_number":"ABC123","loan_type":"personal","loan_amount":100,"interest_rate":5.5,"time_period":"12 months"}'`
-
-#### Manual Verification:
-- [ ] Endpoint paths match Python exactly (`/loan/request`, `/loan/history`)
-- [ ] HTTP methods match (POST for both)
-- [ ] Response JSON format matches Python output
 
 **Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 4.5 for testing.
 
@@ -2236,13 +2201,7 @@ class LoanResourceTest {
 - [ ] LoanResource class achieves ≥ 90% line coverage
 - [ ] Coverage threshold passes: `cd loan-java && ./gradlew jacocoTestCoverageVerification`
 
-#### Manual Verification:
-- [ ] Tests verify correct endpoint paths (`/loan/request`, `/loan/history`)
-- [ ] Tests verify correct HTTP methods (POST)
-- [ ] Tests verify JSON response format matches Python implementation
-- [ ] Tests verify snake_case field names in responses
-
-**Implementation Note**: After completing this phase and all automated verification passes, pause here for manual confirmation before proceeding to Phase 5.
+**Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 5.
 
 ---
 
@@ -2362,11 +2321,6 @@ public class LoanGrpcService extends LoanServiceGrpc.LoanServiceImplBase {
 - [ ] Build succeeds with gRPC code generation: `cd loan-java && ./gradlew build`
 - [ ] Application starts with gRPC enabled: `cd loan-java && ./gradlew quarkusDev`
 - [ ] gRPC reflection works: `grpcurl -plaintext localhost:50053 list`
-
-#### Manual Verification:
-- [ ] gRPC service methods match proto definition
-- [ ] Response format matches Python gRPC implementation
-- [ ] Can be called from existing dashboard service
 
 **Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 5.5 for testing.
 
@@ -2657,12 +2611,7 @@ class LoanGrpcServiceTest {
 - [ ] Coverage threshold passes: `cd loan-java && ./gradlew jacocoTestCoverageVerification`
 - [ ] Overall project coverage ≥ 90%: Check `build/reports/jacoco/test/html/index.html`
 
-#### Manual Verification:
-- [ ] Tests verify correct field mapping from gRPC request to DTO
-- [ ] Tests verify correct field mapping from LoanDocument to gRPC Loan
-- [ ] Tests verify stream completion behavior
-
-**Implementation Note**: After completing this phase and all automated verification passes, pause here for manual confirmation before proceeding to Phase 6.
+**Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 6.
 
 ---
 
@@ -2785,24 +2734,73 @@ services:
 - [ ] Container starts: `docker run -e DB_URL=mongodb://root:example@localhost:27017 -p 50053:50053 martian-bank-loan-java`
 - [ ] Full stack starts with Java loan: `docker-compose -f docker-compose.yaml -f docker-compose.java.yaml up --build`
 
-#### Manual Verification:
+**Implementation Note**: After completing this phase and all automated verification passes, proceed to Phase 7 for final manual verification.
+
+---
+
+## Phase 7: Final Manual Verification
+
+### Overview
+This phase consolidates all manual verification steps that were previously distributed across phases. Complete this phase only after all implementation phases (1-6) have passed their automated verification.
+
+### Project Structure Verification (Phase 1)
+- [ ] Project structure matches the specified layout
+- [ ] All configuration files are in place
+- [ ] No compilation errors in IDE
+
+### Test Reports Verification (Phase 1.5)
+- [ ] Test report viewable at `loan-java/build/reports/tests/test/index.html`
+- [ ] Coverage report viewable at `loan-java/build/reports/jacoco/test/html/index.html`
+- [ ] LoanApplication class shows ≥ 90% line coverage
+
+### Model and Repository Verification (Phase 2 & 2.5)
+- [ ] Model field names match MongoDB document structure (snake_case)
+- [ ] JSON annotations produce correct field names in responses
+- [ ] Repository query logic matches Python implementation exactly
+- [ ] All model tests verify JSON serialization with snake_case field names
+- [ ] Repository tests verify correct MongoDB query construction
+- [ ] Mocks properly isolate tests from actual database
+
+### Business Logic Verification (Phase 3 & 3.5)
+- [ ] Business logic flow matches Python implementation exactly
+- [ ] Log messages match Python log format
+- [ ] Approval condition (amount >= 1) matches Python
+- [ ] Tests cover all business logic branches (approval, rejection reasons)
+- [ ] Tests verify exact behavior match with Python implementation
+- [ ] All repository interactions are properly verified
+
+### REST Endpoint Verification (Phase 4 & 4.5)
+- [ ] Endpoint paths match Python exactly (`/loan/request`, `/loan/history`)
+- [ ] HTTP methods match (POST for both)
+- [ ] Response JSON format matches Python output
+- [ ] Tests verify correct endpoint paths (`/loan/request`, `/loan/history`)
+- [ ] Tests verify correct HTTP methods (POST)
+- [ ] Tests verify JSON response format matches Python implementation
+- [ ] Tests verify snake_case field names in responses
+
+### gRPC Service Verification (Phase 5 & 5.5)
+- [ ] gRPC service methods match proto definition
+- [ ] Response format matches Python gRPC implementation
+- [ ] Can be called from existing dashboard service
+- [ ] Tests verify correct field mapping from gRPC request to DTO
+- [ ] Tests verify correct field mapping from LoanDocument to gRPC Loan
+- [ ] Tests verify stream completion behavior
+
+### Docker Integration Verification (Phase 6)
 - [ ] Java loan service responds on port 50053
 - [ ] Dashboard can communicate with Java loan service
 - [ ] Loan operations work end-to-end through the UI
 
-**Implementation Note**: After completing this phase and all automated verification passes, pause here for final integration testing.
+### End-to-End Testing
+1. Start the full stack with Java loan service
+2. Create a new user account through the UI
+3. Apply for a loan through the UI
+4. Verify loan appears in account dashboard
+5. Check loan history shows the new loan
+6. Verify account balance increased by loan amount
 
----
-
-## Testing Strategy
-
-### Unit Tests (Optional - Out of Scope)
-Not implementing unit tests as per negative scope.
-
-### Integration Tests
-
-#### HTTP Endpoint Tests
-Test the following scenarios by comparing Python vs Java responses:
+### API Parity Testing
+Compare responses between Python and Java services:
 
 1. **Loan Request - Valid Account**
 ```bash
@@ -2841,27 +2839,26 @@ curl -X POST http://localhost:50053/loan/request \
 ```
 Expected: `{"approved": false, "message": "Email or Account number not found."}`
 
-3. **Loan Request - Amount Below Threshold**
-```bash
-# (With valid account but loan_amount < 1)
-# Expected: {"approved": false, "message": "Loan Rejected"}
-```
-
-4. **Loan History**
+3. **Loan History**
 ```bash
 curl -X POST http://localhost:50053/loan/history \
   -H "Content-Type: application/json" \
   -d '{"email": "john@test.com"}'
 ```
 
-### Manual Testing Steps
+---
 
-1. Start the full stack with Java loan service
-2. Create a new user account through the UI
-3. Apply for a loan through the UI
-4. Verify loan appears in account dashboard
-5. Check loan history shows the new loan
-6. Verify account balance increased by loan amount
+## Testing Strategy
+
+### Unit Tests
+Unit tests are included in each coding phase (Phase 1.5, 2.5, 3.5, 4.5, 5.5) with:
+- JUnit 5 as the test framework
+- Mockito for mocking MongoDB and external dependencies
+- REST Assured for HTTP endpoint testing
+- JaCoCo for coverage measurement (minimum 90% threshold)
+
+### Integration and Manual Tests
+All integration tests and manual verification steps are consolidated in **Phase 7: Final Manual Verification**.
 
 ---
 
