@@ -497,9 +497,9 @@ atm-locator-java/src/main/resources/
 
 ### Automated Verification
 
-- [ ] Project compiles: `./gradlew build -x test`
-- [ ] Seed data file exists and is valid JSON
-- [ ] Entity classes compile without Lombok errors
+- [x] Project compiles: `./gradlew build -x test`
+- [x] Seed data file exists and is valid JSON
+- [x] Entity classes compile without Lombok errors
 
 ## Notes
 

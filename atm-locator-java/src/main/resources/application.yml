@@ -1,0 +1,46 @@
+server:
+  port: ${PORT:8001}
+
+spring:
+  application:
+    name: atm-locator
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+  data:
+    mongodb:
+      uri: ${DB_URL:mongodb://root:example@localhost:27017/}
+      database: test
+      auto-index-creation: true
+
+  # Support for DATABASE_HOST environment variable (legacy compatibility)
+  # If DATABASE_HOST is set, it overrides DB_URL
+  config:
+    import: optional:classpath:application-local.yml
+
+logging:
+  level:
+    root: INFO
+    com.martianbank.atmlocator: DEBUG
+    org.springframework.data.mongodb: DEBUG
+
+# OpenAPI configuration
+springdoc:
+  api-docs:
+    path: /docs.json
+  swagger-ui:
+    path: /docs
+
+# Profile-specific MongoDB configuration
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  data:
+    mongodb:
+      host: ${DATABASE_HOST:mongo}
+      port: 27017
+      database: test

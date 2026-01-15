@@ -58,14 +58,18 @@ services:
 
   atm-locator:
     build:
-      context: ./atm-locator
+      context: ./atm-locator-java
     container_name: atm-locator
     hostname: martian-bank-atm-locator
     image: martian-bank-atm-locator
     ports:
       - "8001:8001"
-    env_file:
-      - ./atm-locator/.env
+    environment:
+      DATABASE_HOST: root:example@mongo
+      PORT: 8001
+      NODE_ENV: production
+    depends_on:
+      - mongo
     restart: always
     networks:
       - bankapp-network

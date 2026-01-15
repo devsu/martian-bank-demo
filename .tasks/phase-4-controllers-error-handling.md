@@ -547,9 +547,9 @@ atm-locator-java/src/main/java/com/martianbank/atmlocator/
 
 ### Automated Verification
 
-- [ ] Project compiles: `./gradlew build -x test`
-- [ ] Controller endpoints match legacy paths
-- [ ] Error handler produces correct response format
+- [x] Project compiles: `./gradlew build -x test`
+- [x] Controller endpoints match legacy paths
+- [x] Error handler produces correct response format
 
 ## Notes
 

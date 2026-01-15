@@ -1,0 +1,14 @@
+# Override file for Java version of atm-locator
+# Usage: docker-compose -f docker-compose.yaml -f docker-compose.java.yml up
+
+services:
+  atm-locator:
+    build:
+      context: ./atm-locator-java
+    image: martian-bank-atm-locator-java
+    environment:
+      DATABASE_HOST: root:example@mongo
+      PORT: 8001
+      NODE_ENV: production
+    depends_on:
+      - mongo

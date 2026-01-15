@@ -716,9 +716,9 @@ class DataSeederTest {
 
 ### Automated Verification
 
-- [ ] All tests pass: `cd atm-locator-java && ./gradlew test`
-- [ ] Test report shows all tests green
-- [ ] No compilation errors in test classes
+- [x] All tests pass: `cd atm-locator-java && ./gradlew test`
+- [x] Test report shows all tests green
+- [x] No compilation errors in test classes
 
 ## Test Summary
 

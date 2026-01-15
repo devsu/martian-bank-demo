@@ -301,9 +301,9 @@ class AtmLocatorApplicationTest {
 
 ### Automated Verification
 
-- [ ] All tests pass: `cd atm-locator-java && ./gradlew test`
-- [ ] No test failures in output
-- [ ] Test report generated: `build/reports/tests/test/index.html`
+- [x] All tests pass: `cd atm-locator-java && ./gradlew test`
+- [x] No test failures in output
+- [x] Test report generated: `build/reports/tests/test/index.html`
 
 ## Test Summary
 

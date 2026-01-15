@@ -372,8 +372,8 @@ class AtmLocatorApplicationTest {
 
 ### Automated Verification
 
-- [ ] Project compiles: `cd atm-locator-java && ./gradlew build -x test`
-- [ ] Dependencies resolve: `./gradlew dependencies`
+- [x] Project compiles: `cd atm-locator-java && ./gradlew build -x test`
+- [x] Dependencies resolve: `./gradlew dependencies`
 - [ ] Application starts (with MongoDB available): `./gradlew bootRun`
 
 ## Files Created

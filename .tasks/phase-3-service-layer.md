@@ -586,9 +586,9 @@ Output: { interPlanetary: true, isOpen: true }
 
 ### Automated Verification
 
-- [ ] Project compiles: `./gradlew build -x test`
-- [ ] All new classes are properly annotated
-- [ ] No compilation errors
+- [x] Project compiles: `./gradlew build -x test`
+- [x] All new classes are properly annotated
+- [x] No compilation errors
 
 ## Notes
 

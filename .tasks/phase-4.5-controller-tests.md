@@ -650,9 +650,9 @@ class ErrorResponseTest {
 
 ### Automated Verification
 
-- [ ] All tests pass: `cd atm-locator-java && ./gradlew test`
-- [ ] Controller test coverage above 95%
-- [ ] Exception handler test coverage above 90%
+- [x] All tests pass: `cd atm-locator-java && ./gradlew test`
+- [x] Controller test coverage above 95%
+- [x] Exception handler test coverage above 90%
 
 ## Test Summary
 

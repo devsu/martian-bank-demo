@@ -313,10 +313,10 @@ curl -X POST http://localhost:8080/api/atm/ \
 
 ### Automated Verification
 
-- [ ] Docker image builds successfully: `docker build -t atm-locator-java ./atm-locator-java`
-- [ ] Container starts without errors: `docker-compose up -d atm-locator`
-- [ ] Health check passes: `docker inspect --format='{{.State.Health.Status}}' atm-locator`
-- [ ] Endpoint responds: `curl -X POST http://localhost:8001/api/atm/ -H "Content-Type: application/json" -d '{}'`
+- [x] Docker image builds successfully: `docker build -t atm-locator-java ./atm-locator-java`
+- [x] Container starts without errors: `docker-compose up -d atm-locator`
+- [x] Health check passes: `docker inspect --format='{{.State.Health.Status}}' atm-locator`
+- [x] Endpoint responds: `curl -X POST http://localhost:8001/api/atm/ -H "Content-Type: application/json" -d '{}'`
 
 ## Rollback Procedure
 

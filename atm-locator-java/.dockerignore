@@ -1,0 +1,31 @@
+# Build outputs
+build/
+.gradle/
+bin/
+out/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Test files (not needed in runtime)
+src/test/
+
+# Documentation
+*.md
+docs/
+
+# Local environment files (will be provided via docker-compose)
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db

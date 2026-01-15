@@ -682,9 +682,9 @@ class AtmNotFoundExceptionTest {
 
 ### Automated Verification
 
-- [ ] All tests pass: `cd atm-locator-java && ./gradlew test`
-- [ ] Service test coverage above 95%
-- [ ] DTO test coverage above 85%
+- [x] All tests pass: `cd atm-locator-java && ./gradlew test`
+- [x] Service test coverage above 95%
+- [x] DTO test coverage above 85%
 
 ## Test Summary
 
