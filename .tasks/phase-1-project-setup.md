@@ -376,12 +376,6 @@ class AtmLocatorApplicationTest {
 - [ ] Dependencies resolve: `./gradlew dependencies`
 - [ ] Application starts (with MongoDB available): `./gradlew bootRun`
 
-### Manual Verification
-
-- [ ] Directory structure matches the specification
-- [ ] All configuration files are in place
-- [ ] Gradle wrapper is generated: `./gradlew wrapper`
-
 ## Files Created
 
 | File | Purpose |

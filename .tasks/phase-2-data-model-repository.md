@@ -501,13 +501,6 @@ atm-locator-java/src/main/resources/
 - [ ] Seed data file exists and is valid JSON
 - [ ] Entity classes compile without Lombok errors
 
-### Manual Verification
-
-- [ ] All 4 model classes created with correct field names
-- [ ] Repository interface has both query methods
-- [ ] DataSeeder processes MongoDB extended JSON format
-- [ ] Seed data file copied from legacy (13 records)
-
 ## Notes
 
 - The `@Field` annotation is used on `isOpen` and `interPlanetary` to ensure exact field name matching with MongoDB documents

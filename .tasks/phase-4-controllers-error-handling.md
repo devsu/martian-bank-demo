@@ -551,13 +551,6 @@ atm-locator-java/src/main/java/com/martianbank/atmlocator/
 - [ ] Controller endpoints match legacy paths
 - [ ] Error handler produces correct response format
 
-### Manual Verification
-
-- [ ] All 3 endpoints respond with correct JSON structure
-- [ ] Error responses match legacy format exactly
-- [ ] CORS headers present in responses
-- [ ] OpenAPI annotations generate correct documentation
-
 ## Notes
 
 - The `getATMs` endpoint returns a plain string `"No ATMs found"` for 404 (not wrapped in ErrorResponse) to match legacy behavior

@@ -590,12 +590,6 @@ Output: { interPlanetary: true, isOpen: true }
 - [ ] All new classes are properly annotated
 - [ ] No compilation errors
 
-### Manual Verification
-
-- [ ] Service logic matches legacy behavior exactly
-- [ ] DTOs have correct JSON field names
-- [ ] Exception class follows project conventions
-
 ## Notes
 
 - `AtmListResponse` uses `@JsonProperty("_id")` to ensure the JSON field name matches legacy MongoDB behavior

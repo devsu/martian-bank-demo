@@ -318,13 +318,6 @@ curl -X POST http://localhost:8080/api/atm/ \
 - [ ] Health check passes: `docker inspect --format='{{.State.Health.Status}}' atm-locator`
 - [ ] Endpoint responds: `curl -X POST http://localhost:8001/api/atm/ -H "Content-Type: application/json" -d '{}'`
 
-### Manual Verification
-
-- [ ] Full stack starts with `docker-compose up --build`
-- [ ] UI can discover ATMs (via NGINX)
-- [ ] Logs show successful MongoDB connection
-- [ ] Logs show database seeding completed
-
 ## Rollback Procedure
 
 If issues arise, rollback to Node.js version:

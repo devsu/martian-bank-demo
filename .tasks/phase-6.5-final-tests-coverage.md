@@ -268,8 +268,71 @@ jobs:
 - [ ] No test failures in report
 - [ ] Coverage report generated successfully
 
-### Manual Verification
+### Manual Verification - Consolidated from All Phases
 
+This section consolidates all manual verification from Phases 1-6 to be performed after full implementation.
+
+#### Phase 1: Project Setup Verification
+- [ ] Directory structure matches the specification
+- [ ] All configuration files are in place
+- [ ] Gradle wrapper is generated: `./gradlew wrapper`
+
+#### Phase 1.5: Configuration Tests Verification
+- [ ] Review test coverage for config package in JaCoCo report
+- [ ] Verify all test methods have meaningful assertions
+- [ ] Confirm test names follow naming convention
+
+#### Phase 2: Data Model Verification
+- [ ] All 4 model classes created with correct field names
+- [ ] Repository interface has both query methods
+- [ ] DataSeeder processes MongoDB extended JSON format
+- [ ] Seed data file copied from legacy (13 records)
+
+#### Phase 2.5: Data Model Tests Verification
+- [ ] All test files created in correct directories
+- [ ] TestDataFactory provides comprehensive test data
+- [ ] DataSeeder tests verify MongoDB extended JSON processing
+
+#### Phase 3: Service Layer Verification
+- [ ] Service logic matches legacy behavior exactly
+- [ ] DTOs have correct JSON field names
+- [ ] Exception class follows project conventions
+
+#### Phase 3.5: Service Tests Verification
+- [ ] All query logic scenarios covered
+- [ ] Randomization test verifies shuffling behavior
+- [ ] Response projection tests verify correct field inclusion/exclusion
+
+#### Phase 4: Controllers Verification
+- [ ] All 3 endpoints respond with correct JSON structure
+- [ ] Error responses match legacy format exactly
+- [ ] CORS headers present in responses
+- [ ] OpenAPI annotations generate correct documentation
+
+#### Phase 4.5: Controller Tests Verification
+- [ ] All endpoint paths tested correctly
+- [ ] Response JSON structure verified
+- [ ] Error response format matches legacy exactly
+- [ ] Stack trace visibility controlled by NODE_ENV
+
+#### Phase 5: Docker Integration Verification
+- [ ] Full stack starts with `docker-compose up --build`
+- [ ] UI can discover ATMs (via NGINX)
+- [ ] Logs show successful MongoDB connection
+- [ ] Logs show database seeding completed
+
+#### Phase 5.5: Docker Tests Verification
+- [ ] Full stack runs with `docker-compose up --build`
+- [ ] UI ATM Locator feature works end-to-end
+- [ ] No errors in application logs
+
+#### Phase 6: OpenAPI Verification
+- [ ] Swagger UI displays all 3 endpoints
+- [ ] "Try it out" feature works for each endpoint
+- [ ] Request/response examples are accurate
+- [ ] API tag is "ATM"
+
+#### Phase 6.5: Final Coverage Verification
 - [ ] HTML coverage report shows >= 90% line coverage
 - [ ] All packages have reasonable coverage
 - [ ] No critical code paths left untested

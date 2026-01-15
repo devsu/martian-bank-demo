@@ -313,13 +313,6 @@ curl -s http://localhost:8001/docs.json | jq '.info.title'
 - [ ] Swagger UI loads: `curl http://localhost:8001/docs`
 - [ ] All verification tests pass
 
-### Manual Verification
-
-- [ ] Swagger UI displays all 3 endpoints
-- [ ] "Try it out" feature works for each endpoint
-- [ ] Request/response examples are accurate
-- [ ] API tag is "ATM"
-
 ## Directory Structure After Phase 6
 
 ```

@@ -431,12 +431,6 @@ echo "=== Parity Test Complete ==="
 - [ ] Docker health check shows "healthy"
 - [ ] All API responses match expected structure
 
-### Manual Verification
-
-- [ ] Full stack runs with `docker-compose up --build`
-- [ ] UI ATM Locator feature works end-to-end
-- [ ] No errors in application logs
-
 ## Running the Tests
 
 ```bash

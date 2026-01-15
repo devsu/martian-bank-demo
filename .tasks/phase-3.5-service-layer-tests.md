@@ -686,12 +686,6 @@ class AtmNotFoundExceptionTest {
 - [ ] Service test coverage above 95%
 - [ ] DTO test coverage above 85%
 
-### Manual Verification
-
-- [ ] All query logic scenarios covered
-- [ ] Randomization test verifies shuffling behavior
-- [ ] Response projection tests verify correct field inclusion/exclusion
-
 ## Test Summary
 
 | Test Class | Test Count | Coverage Focus |

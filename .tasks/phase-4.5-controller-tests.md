@@ -654,13 +654,6 @@ class ErrorResponseTest {
 - [ ] Controller test coverage above 95%
 - [ ] Exception handler test coverage above 90%
 
-### Manual Verification
-
-- [ ] All endpoint paths tested correctly
-- [ ] Response JSON structure verified
-- [ ] Error response format matches legacy exactly
-- [ ] Stack trace visibility controlled by NODE_ENV
-
 ## Test Summary
 
 | Test Class | Test Count | Coverage Focus |
