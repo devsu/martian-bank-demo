@@ -37,6 +37,7 @@ services:
     depends_on:
       - customer-auth
       - atm-locator
+      - atm-locator-legacy
       - ui
     restart: always
     networks:
@@ -56,30 +57,34 @@ services:
     networks:
       - bankapp-network
 
-  # ORIGINAL NODE.JS ATM LOCATOR - REPLACED BY JAVA VERSION
-  # atm-locator:
-  #   build:
-  #     context: ./atm-locator
-  #   container_name: atm-locator
-  #   hostname: martian-bank-atm-locator
-  #   image: martian-bank-atm-locator
-  #   ports:
-  #     - "8001:8001"
-  #   env_file:
-  #     - ./atm-locator/.env
-  #   restart: always
-  #   networks:
-  #     - bankapp-network
+  # Legacy Node.js ATM Locator (for comparison)
+  atm-locator-legacy:
+    build:
+      context: ./atm-locator
+    container_name: atm-locator-legacy
+    hostname: atm-locator-legacy
+    image: martian-bank-atm-locator-legacy
+    ports:
+      - "9091:9091"
+    environment:
+      PORT: 9091
+    env_file:
+      - ./atm-locator/.env
+    depends_on:
+      - mongo
+    restart: always
+    networks:
+      - bankapp-network
 
-  # Java ATM Locator Service (Spring Boot)
+  # Java ATM Locator Service (Spring Boot) - Primary
   atm-locator:
     build:
       context: ./atm-locator-java
     container_name: atm-locator-java
-    hostname: atm-locator-java
+    hostname: atm-locator
     image: martian-bank-atm-locator-java
     ports:
-      - "8001:8001"
+      - "8081:8081"
     environment:
       SPRING_DATA_MONGODB_URI: mongodb://root:example@mongo:27017/martianbank?authSource=admin
     depends_on:
