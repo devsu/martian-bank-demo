@@ -97,7 +97,7 @@ public class AtmServiceImpl implements AtmService {
      * @return filtered list of ATM responses
      */
     private List<AtmResponse> filterByInterPlanetary(List<AtmResponse> atmResponses, List<Atm> entities, AtmSearchRequest request) {
-        boolean wantInterPlanetary = request != null && Boolean.TRUE.equals(request.isInterPlanetary());
+        boolean wantInterPlanetary = request != null && request.isInterPlanetary();
 
         // Create a map of entity IDs to their interPlanetary status
         return atmResponses.stream()
@@ -112,7 +112,7 @@ public class AtmServiceImpl implements AtmService {
                         return false;
                     }
 
-                    boolean isInterPlanetary = Boolean.TRUE.equals(entity.getIsInterPlanetary());
+                    boolean isInterPlanetary = entity.getIsInterPlanetary();
                     return wantInterPlanetary == isInterPlanetary;
                 })
                 .collect(Collectors.toList());
@@ -126,9 +126,9 @@ public class AtmServiceImpl implements AtmService {
      * @return filtered list of ATMs
      */
     private List<AtmResponse> applyOpenNowFilter(List<AtmResponse> atms, AtmSearchRequest request) {
-        if (request != null && Boolean.TRUE.equals(request.isOpenNow())) {
+        if (request != null && request.isOpenNow()) {
             return atms.stream()
-                    .filter(atm -> Boolean.TRUE.equals(atm.isOpen()))
+                    .filter(atm -> atm.isOpen())
                     .collect(Collectors.toList());
         }
         return atms;
