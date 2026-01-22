@@ -65,7 +65,7 @@ Phase-01 establishes the foundational Spring Boot architecture with a **top-to-b
 1. **Docker Infrastructure** (PREREQUISITE FOR ALL DEVELOPMENT):
    - [P1-001] - [AI] Create multi-stage Dockerfile for Java service
    - [P1-002] - [AI] Configure .dockerignore and build optimization
-   - [P1-003] - [AI] Update docker-compose.yml to add Java ATM Locator service
+   - [P1-003] - [AI] Update docker-compose.yml to replace Node.js ATM Locator with Java service
    - [P1-004] - [MANUAL] Verify Docker build and container startup
 
 2. **Project Foundation**:
@@ -117,26 +117,23 @@ Phase-01 establishes the foundational Spring Boot architecture with a **top-to-b
 ## Development Workflow
 
 ```bash
-# Build and start services
-docker-compose up -d --build mongo atm-locator-java
+# Build and start services (Java replaces Node.js on port 8001)
+docker-compose up -d --build mongo atm-locator
 
 # Test endpoint (returns mocked data initially)
-curl -X POST http://localhost:8002/api/atm/ -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:8001/api/atm/ -H "Content-Type: application/json" -d '{}'
 
 # View logs
-docker-compose logs -f atm-locator-java
+docker-compose logs -f atm-locator
 
 # Rebuild after changes
-docker-compose up -d --build atm-locator-java
-
-# Compare with Node.js service
-curl -X POST http://localhost:8001/api/atm/ -H "Content-Type: application/json" -d '{}'
+docker-compose up -d --build atm-locator
 ```
 
 ## Notes
 
+- **Drop-and-replace migration**: Java service replaces Node.js on port 8001 from day one
 - **Top-to-bottom approach**: API contract defined before database schema
 - **Mocked responses first**: Controller works with hardcoded data before service integration
 - **Incremental integration**: Each layer is tested independently before wiring
 - Docker-first development: Build and test in containers from day one
-- Java service runs on port 8002 alongside Node.js on 8001 during development

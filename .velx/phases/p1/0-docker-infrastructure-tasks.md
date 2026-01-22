@@ -18,9 +18,9 @@ Create `atm-locator-java/.dockerignore` to exclude build artifacts, IDE files, G
 
 ---
 
-### [P1-003] - [AI] Update docker-compose.yml to add Java ATM Locator service
+### [P1-003] - [AI] Update docker-compose.yml to replace Node.js ATM Locator with Java service
 
-Add `atm-locator-java` service to docker-compose.yaml on port 8002 (external) mapping to 8001 (internal), connected to bankapp-network with MongoDB dependency.
+Replace existing `atm-locator` service with Java implementation. Update build context to `./atm-locator-java`, keep port 8001 mapping. Comment out original Node.js config for reference. Maintain bankapp-network connection and MongoDB dependency.
 
 ---
 

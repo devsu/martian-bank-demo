@@ -14,4 +14,4 @@ Create AtmServiceTest using JUnit 5 and Mockito. Test findAtms() scenarios: no f
 
 ### [P1-019] - [MANUAL] Perform manual endpoint validation via Docker
 
-Start both Node.js (8001) and Java (8002) services. Compare responses for empty body, isOpenNow filter, isInterPlanetary filter, and both filters. Verify response structure, HTTP status codes, and CORS headers match.
+Start Java service on port 8001. Test POST /api/atm/ with empty body, isOpenNow filter, isInterPlanetary filter, and both filters. Verify response structure matches expected format, HTTP status codes are correct, and CORS headers are present.
