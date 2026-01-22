@@ -1,67 +1,54 @@
-# Phase-04 Plan 1 Tasks: Docker Containerization and Deployment
+# Phase 04 Tasks: Production Cutover and Documentation
 
-Deploy the fully functional Java service to Docker Compose environment as a direct replacement for the Node.js service with basic smoke testing to verify successful deployment.
+Final deployment phase that replaces the Node.js ATM Locator service with the Java implementation in production. Since Docker infrastructure was established in Phase-01, this phase focuses on the cutover process, final validation, and documentation.
 
 ## Components
 
-- **docker**: Multi-stage Dockerfile for building and packaging the Java service
-- **docker-compose**: Docker Compose configuration updates for service replacement
+- **cutover**: Switch from Node.js to Java service in docker-compose
+- **smoke-tests**: Extended validation scripts for production cutover
 - **documentation**: Deployment procedures, rollback plans, and troubleshooting guides
-- **smoke-tests**: Basic validation scripts for post-deployment verification
 
 ## Task Summary
 
-### docker
-- 2 tasks total
-- 2 [AI] automated tasks
-- 0 [MANUAL] human-required tasks
-
-### docker-compose
+### cutover
 - 2 tasks total
 - 1 [AI] automated tasks
 - 1 [MANUAL] human-required tasks
+
+### smoke-tests
+- 1 task total
+- 1 [AI] automated task
+- 0 [MANUAL] human-required tasks
 
 ### documentation
 - 3 tasks total
 - 2 [AI] automated tasks
 - 1 [MANUAL] human-required tasks
 
-### smoke-tests
-- 2 tasks total
-- 2 [AI] automated tasks
-- 0 [MANUAL] human-required tasks
-
 ## Execution Order
 
-1. **Build Infrastructure Setup**:
-   - [TASK-001] - [AI] Create multi-stage Dockerfile with build and runtime stages
-   - [TASK-002] - [AI] Configure Docker build optimization and image bundling
+1. **Cutover Preparation**:
+   - [TASK-001] - [AI] Update docker-compose.yml to replace Node.js with Java service
+   - [TASK-002] - [MANUAL] Coordinate cutover schedule and perform service switch
 
-2. **Docker Compose Configuration**:
-   - [TASK-003] - [AI] Update docker-compose.yml to replace Node.js service with Java service
-   - [TASK-004] - [MANUAL] Coordinate with operations team for cutover schedule and access
+2. **Validation**:
+   - [TASK-003] - [AI] Create comprehensive production smoke test suite
 
-3. **Testing Infrastructure**:
-   - [TASK-005] - [AI] Create smoke test scripts for service validation
-   - [TASK-006] - [AI] Implement automated health check and API endpoint tests
-
-4. **Documentation and Procedures**:
-   - [TASK-007] - [AI] Create step-by-step deployment documentation
-   - [TASK-008] - [AI] Document rollback procedures and troubleshooting guide
-   - [TASK-009] - [MANUAL] Review and validate deployment procedures with operations team
+3. **Documentation**:
+   - [TASK-004] - [AI] Create step-by-step deployment documentation
+   - [TASK-005] - [AI] Document rollback procedures and troubleshooting guide
+   - [TASK-006] - [MANUAL] Review and validate deployment procedures with team
 
 ## Cross-Component Dependencies
 
-- [TASK-001] and [TASK-002] must complete before [TASK-003] (Dockerfile needed for docker-compose service definition)
-- [TASK-003] must complete before [TASK-005] and [TASK-006] (compose environment needed for smoke tests)
-- [TASK-007] and [TASK-008] should reference [TASK-003] (documentation describes compose configuration)
-- [TASK-004] and [TASK-009] require team coordination and approval before deployment
+- All Phase-01, Phase-02, and Phase-03 tasks must be complete
+- [TASK-001] must complete before [TASK-002] (compose config needed for cutover)
+- [TASK-003] supports [TASK-002] (smoke tests validate cutover success)
+- [TASK-004] and [TASK-005] should be complete before [TASK-006] (docs needed for review)
 
 ## Integration Points
 
-- **Docker to Docker Compose**: Dockerfile produces image referenced in docker-compose.yml service definition
-- **Docker Compose to Smoke Tests**: Smoke test scripts execute against running containers defined in compose configuration
-- **Documentation to All Components**: Deployment docs describe usage of Dockerfile, compose setup, and smoke test execution
-- **Network Integration**: Java service container connects to existing MongoDB container via bankapp-network
-- **Port Mapping**: Java service exposes port 8001 (same as Node.js service for API compatibility)
-- **Data Seeding**: atm_data.json bundled in Docker image, automatically seeded on container startup
+- **Docker Compose Update**: Modify existing atm-locator service to use Java image instead of Node.js
+- **Port Mapping**: Java service takes over port 8001 (same as Node.js for API compatibility)
+- **NGINX Integration**: No NGINX changes needed - same hostname and port
+- **Network Integration**: Java service uses same bankapp-network connection

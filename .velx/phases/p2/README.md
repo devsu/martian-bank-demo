@@ -1,18 +1,35 @@
-# Plan 01 Tasks: Complete Public API Surface
+# Phase 02 Tasks: Complete Public API Surface
 
-This plan implements the remaining unauthenticated endpoints to achieve feature parity with the Node.js implementation. The focus is on completing GET /api/atm/{id}, establishing centralized exception handling, and enhancing the existing POST /api/atm/ filtering logic with in-memory AND filtering.
+This phase implements the remaining unauthenticated endpoints following the **top-to-bottom approach**: exception handling (API surface), then controllers, then services. Focus on GET /api/atm/{id} endpoint and enhanced filtering logic.
+
+## Development Philosophy
+
+**Top-to-Bottom**: Build from API surface down:
+1. Exception Handling → Define error response format (client-facing)
+2. Controller Layer → Add GET endpoint with path variable
+3. Service Layer → Implement business logic for findById and enhanced filtering
+4. Testing → Validate behavioral parity
 
 ## Components
 
-- **backend**: Core application implementation including controllers, services, repositories, and exception handling
-- **testing**: Unit tests, integration tests, and manual validation against Node.js implementation
+- **exception-handling**: Global exception handler and custom exceptions (API surface)
+- **controller**: GET /api/atm/{id} endpoint
+- **service**: findById implementation and enhanced filtering
+- **testing**: Unit tests and manual validation
 
 ## Task Summary
 
-### backend
-- 9 tasks total
-- 6 [AI] automated tasks
-- 3 [MANUAL] human-required tasks
+### exception-handling
+- 2 tasks total
+- 2 [AI] automated tasks
+
+### controller
+- 1 task total
+- 1 [AI] automated task
+
+### service
+- 2 tasks total
+- 2 [AI] automated tasks
 
 ### testing
 - 4 tasks total
@@ -21,55 +38,38 @@ This plan implements the remaining unauthenticated endpoints to achieve feature 
 
 ## Execution Order
 
-The plan follows a horizontal layer-by-layer development approach to ensure consistent patterns across all features before moving to the next layer.
-
-### Phase 1: Exception Handling Foundation (Setup)
+### Phase 1: Exception Handling (API Surface First)
 1. [TASK-001] - [AI] Create custom exception classes
 2. [TASK-002] - [AI] Implement GlobalExceptionHandler with @ControllerAdvice
 
-### Phase 2: Controllers Layer (Implement all endpoints)
+### Phase 2: Controller Layer (Endpoint Definition)
 3. [TASK-003] - [AI] Add GET /api/atm/{id} endpoint to AtmController
 
-### Phase 3: Services Layer (Business logic)
+### Phase 3: Service Layer (Business Logic)
 4. [TASK-004] - [AI] Implement AtmService.findById() with ObjectId validation
-5. [TASK-005] - [AI] Enhance AtmService.findAtms() with in-memory AND filtering logic
+5. [TASK-005] - [AI] Enhance AtmService.findAtms() with in-memory AND filtering
 
-### Phase 4: Testing Layer (Verification)
+### Phase 4: Testing
 6. [TASK-006] - [AI] Write unit tests for AtmService.findById()
 7. [TASK-007] - [AI] Write unit tests for enhanced filtering logic
 8. [TASK-008] - [AI] Write unit tests for GlobalExceptionHandler
 9. [TASK-009] - [MANUAL] Perform manual validation against Node.js implementation
 
-### Phase 5: Final Integration (Manual)
-10. [TASK-010] - [MANUAL] Validate error response format parity
-11. [TASK-011] - [MANUAL] Document testing results and edge cases
-12. [TASK-012] - [MANUAL] Validate complete filter combination matrix
-13. [TASK-013] - [MANUAL] Review and validate ObjectId handling behavior
-
 ## Cross-Component Dependencies
 
-- **TASK-002** (GlobalExceptionHandler) must be completed before **TASK-003** (GET endpoint) to ensure exceptions are properly handled
-- **TASK-001** (custom exceptions) must be completed before **TASK-004** (findById implementation) as it throws these exceptions
-- **TASK-004** and **TASK-005** must be completed before their corresponding test tasks (**TASK-006**, **TASK-007**)
-- All automated tasks (**TASK-001** through **TASK-008**) must be completed before manual validation tasks (**TASK-009** through **TASK-013**)
+- **TASK-001 → TASK-002**: Exception handler needs exception classes
+- **TASK-002 → TASK-003**: Controller relies on exception handler for error responses
+- **TASK-003 → TASK-004**: Controller endpoint calls service method
+- **TASK-004, TASK-005 → TASK-006, TASK-007**: Tests require implementations
 
 ## Integration Points
 
+### Error Response Flow (Top-to-Bottom)
+1. Client receives consistent JSON error format
+2. GlobalExceptionHandler catches and formats exceptions
+3. Service throws typed exceptions (AtmNotFoundException, InvalidObjectIdException)
+4. Repository returns Optional.empty() for not found
+
 ### Controllers to Services
-- AtmController calls AtmService.findById() for GET /api/atm/{id}
-- AtmController calls AtmService.findAtms() for POST /api/atm/ with enhanced filtering
-
-### Services to Repository
-- AtmService uses AtmRepository.findById() for single document lookup
-- AtmService uses AtmRepository.findAll() for filter-based queries
-
-### Exception Flow
-- Service layer throws custom exceptions (InvalidObjectIdException, AtmNotFoundException)
-- GlobalExceptionHandler intercepts all controller exceptions
-- Handler returns consistent JSON error responses matching Node.js format
-
-### Testing Strategy
-- Unit tests validate service logic with mocked repositories
-- Unit tests validate exception handler responses
-- Manual validation ensures behavioral parity with Node.js implementation
-- Side-by-side comparison for all filter combinations and edge cases
+- AtmController.getAtmById() → AtmService.findById()
+- AtmController.searchAtms() → AtmService.findAtms() (enhanced filtering)

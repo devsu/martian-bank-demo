@@ -1,77 +1,29 @@
-# Validation Tasks
+# Controller and Validation Tasks
 
 ## Overview
 
-Validation layer ensures data integrity for ATM creation using Bean Validation (JSR-303) annotations and custom validators for complex business rules. This provides declarative validation that matches Node.js service patterns.
-
-## Prerequisites
-
-- AtmCreateRequest DTO created ([TASK-003])
-- Bean Validation dependency available in Spring Boot
-- Understanding of Node.js validation error format
+Define the POST /atm/add endpoint with request validation. Controller comes first (API surface), then validation details.
 
 ## Tasks
 
-### [TASK-004] - [AI] Create custom validators for complex business rules
+### [TASK-003] - [AI] Create AtmCreateRequest DTO with Bean Validation
 
-**Why**: Complex validation logic beyond simple annotations requires custom validators for maintainability.
-
-**What**:
-- Identify business rules requiring custom validation from Node.js service
-- Create custom constraint annotations for complex rules
-- Implement ConstraintValidator classes for each custom annotation
-- Support validation for coordinate ranges, address formats, or domain-specific rules
-- Make validators reusable across multiple DTOs if needed
-
-**Testing** (TDD - write tests first):
-- Unit test: custom validators accept valid values
-- Unit test: custom validators reject invalid values
-- Unit test: validation messages are descriptive
-- Test edge cases for boundary conditions
-
-**Dependencies**: [TASK-003] (requires AtmCreateRequest DTO)
+Create AtmCreateRequest record with @NotBlank name, @NotNull/@Valid nested LocationRequest, @NotNull isOpenNow and isInterPlanetary. Create nested DTOs with validation: CoordinatesRequest (latitude -90 to 90, longitude -180 to 180), AddressRequest (required street, city, state, zip).
 
 ---
 
-### [TASK-005] - [AI] Implement field-level validation for structured fields
+### [TASK-004] - [AI] Add POST /atm/add endpoint to AtmController
 
-**Why**: Structured fields like coordinates and addresses require nested validation.
-
-**What**:
-- Add validation annotations to nested objects within AtmCreateRequest
-- Validate coordinate latitude/longitude ranges
-- Validate address field formats and required subfields
-- Validate atmHours structure and time formats
-- Use @Valid annotation for nested object validation
-- Ensure validation cascades through object graph
-
-**Testing** (TDD - write tests first):
-- Unit test: invalid coordinates rejected
-- Unit test: invalid address format rejected
-- Unit test: invalid atmHours rejected
-- Unit test: valid structured fields pass validation
-- Test partial vs complete nested objects
-
-**Dependencies**: [TASK-003] (requires AtmCreateRequest DTO)
+Add @PostMapping("/add") endpoint with @Valid @RequestBody AtmCreateRequest. Return ResponseEntity with 201 Created status. Document with OpenAPI annotations.
 
 ---
 
-### [TASK-016] - [MANUAL] Validate behavioral parity with Node.js service
+### [TASK-005] - [AI] Extend GlobalExceptionHandler for validation errors
 
-**Why**: Manual validation ensures the Java implementation exactly matches Node.js behavior for migration consistency.
+Add handler for MethodArgumentNotValidException. Return 400 Bad Request with field-level error messages in format: {"message": "Validation failed", "errors": {"field": "message"}}.
 
-**What**:
-- Start local Spring Boot application on port 8001
-- Start Node.js service for side-by-side comparison
-- Test POST /atm/add with valid complete payload - compare 201 response structure
-- Test POST /atm/add with missing required fields - compare 400 response and field errors
-- Test POST /atm/add with invalid field formats - compare validation error details
-- Test POST /atm/add with duplicate data - compare response status and message
-- Test edge cases: empty strings, nulls, extreme coordinates, partial payloads
-- Verify created ATM persists to MongoDB
-- Retrieve created ATM via GET /api/atm/{id} - confirm data integrity
-- Validate OpenAPI /docs UI displays endpoint correctly
-- Validate /docs.json specification structure matches Node.js Swagger
-- Document any discrepancies for resolution
+---
 
-**Dependencies**: All implementation tasks ([TASK-002] through [TASK-015]) completed
+### [TASK-006] - [AI] Add field-level validation for nested objects
+
+Ensure @Valid cascades to nested objects. Add descriptive validation messages for coordinate range violations. Test that nested field paths appear correctly in error responses.
