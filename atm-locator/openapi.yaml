@@ -22,6 +22,8 @@ tags:
   - name: ATM
     description: ATM location and management operations
 
+security: []  # All endpoints are public by default
+
 paths:
   /api/atm:
     post:
@@ -212,6 +214,7 @@ paths:
                   summary: ATM not found
                   value:
                     message: "ATM information not found"
+                    stack: null
                 invalidId:
                   summary: Invalid ObjectId format
                   value:
