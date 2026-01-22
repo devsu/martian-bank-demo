@@ -39,41 +39,40 @@ This phase implements the POST /atm/add endpoint following the **top-to-bottom a
 - 1 [MANUAL] human-required task
 
 ### testing
-- 4 tasks total
-- 3 [AI] automated tasks
+- 3 tasks total
+- 2 [AI] automated tasks
 - 1 [MANUAL] human-required task
 
 ## Execution Order
 
-### Phase 1: API Documentation (Contract First)
-1. [TASK-001] - [AI] Add SpringDoc OpenAPI dependency and configuration
-2. [TASK-002] - [AI] Document existing endpoints with OpenAPI annotations
+### Step 1: API Documentation (Contract First)
+1. [P3-001] - [AI] Add SpringDoc OpenAPI dependency and configuration
+2. [P3-002] - [AI] Document existing endpoints with OpenAPI annotations
 
-### Phase 2: Controller Layer (Endpoint Definition)
-3. [TASK-003] - [AI] Create AtmCreateRequest DTO with Bean Validation
-4. [TASK-004] - [AI] Add POST /atm/add endpoint to AtmController
+### Step 2: Controller Layer (Endpoint Definition)
+3. [P3-003] - [AI] Create AtmCreateRequest DTO with Bean Validation
+4. [P3-004] - [AI] Add POST /atm/add endpoint to AtmController
 
-### Phase 3: Validation Enhancement
-5. [TASK-005] - [AI] Extend GlobalExceptionHandler for validation errors
-6. [TASK-006] - [AI] Add field-level validation for nested objects
+### Step 3: Validation Enhancement
+5. [P3-005] - [AI] Extend GlobalExceptionHandler for validation errors
+6. [P3-006] - [AI] Add field-level validation for nested objects
 
-### Phase 4: Service Layer
-7. [TASK-007] - [MANUAL] Investigate Node.js duplicate handling logic
-8. [TASK-008] - [AI] Implement AtmService.createAtm() with duplicate detection
+### Step 4: Service Layer
+7. [P3-007] - [MANUAL] Investigate Node.js duplicate handling logic
+8. [P3-008] - [AI] Implement AtmService.createAtm() with duplicate detection
 
-### Phase 5: Testing
-9. [TASK-009] - [AI] Write unit tests for AtmService.createAtm()
-10. [TASK-010] - [AI] Write unit tests for validation logic
-11. [TASK-011] - [AI] Write integration tests for POST /atm/add
-12. [TASK-012] - [MANUAL] Validate behavioral parity with Node.js service
+### Step 5: Testing
+9. [P3-009] - [AI] Write unit tests for AtmService.createAtm()
+10. [P3-010] - [AI] Write unit tests for validation logic
+11. [P3-011] - [MANUAL] Validate behavioral parity with Node.js service
 
 ## Cross-Component Dependencies
 
-- **TASK-001 → TASK-002**: OpenAPI config needed before annotations
-- **TASK-003 → TASK-004**: DTO needed for controller endpoint
-- **TASK-004 → TASK-005**: Controller exposes validation errors
-- **TASK-007 → TASK-008**: Node.js behavior informs duplicate logic
-- **TASK-008 → TASK-009**: Service implementation needed for tests
+- **P3-001 → P3-002**: OpenAPI config needed before annotations
+- **P3-003 → P3-004**: DTO needed for controller endpoint
+- **P3-004 → P3-005**: Controller exposes validation errors
+- **P3-007 → P3-008**: Node.js behavior informs duplicate logic
+- **P3-008 → P3-009**: Service implementation needed for tests
 
 ## Integration Points
 

@@ -38,29 +38,29 @@ This phase implements the remaining unauthenticated endpoints following the **to
 
 ## Execution Order
 
-### Phase 1: Exception Handling (API Surface First)
-1. [TASK-001] - [AI] Create custom exception classes
-2. [TASK-002] - [AI] Implement GlobalExceptionHandler with @ControllerAdvice
+### Step 1: Exception Handling (API Surface First)
+1. [P2-001] - [AI] Create custom exception classes
+2. [P2-002] - [AI] Implement GlobalExceptionHandler with @ControllerAdvice
 
-### Phase 2: Controller Layer (Endpoint Definition)
-3. [TASK-003] - [AI] Add GET /api/atm/{id} endpoint to AtmController
+### Step 2: Controller Layer (Endpoint Definition)
+3. [P2-003] - [AI] Add GET /api/atm/{id} endpoint to AtmController
 
-### Phase 3: Service Layer (Business Logic)
-4. [TASK-004] - [AI] Implement AtmService.findById() with ObjectId validation
-5. [TASK-005] - [AI] Enhance AtmService.findAtms() with in-memory AND filtering
+### Step 3: Service Layer (Business Logic)
+4. [P2-004] - [AI] Implement AtmService.findById() with ObjectId validation
+5. [P2-005] - [AI] Enhance AtmService.findAtms() with in-memory AND filtering
 
-### Phase 4: Testing
-6. [TASK-006] - [AI] Write unit tests for AtmService.findById()
-7. [TASK-007] - [AI] Write unit tests for enhanced filtering logic
-8. [TASK-008] - [AI] Write unit tests for GlobalExceptionHandler
-9. [TASK-009] - [MANUAL] Perform manual validation against Node.js implementation
+### Step 4: Testing
+6. [P2-006] - [AI] Write unit tests for AtmService.findById()
+7. [P2-007] - [AI] Write unit tests for enhanced filtering logic
+8. [P2-008] - [AI] Write unit tests for GlobalExceptionHandler
+9. [P2-009] - [MANUAL] Perform manual validation against Node.js implementation
 
 ## Cross-Component Dependencies
 
-- **TASK-001 → TASK-002**: Exception handler needs exception classes
-- **TASK-002 → TASK-003**: Controller relies on exception handler for error responses
-- **TASK-003 → TASK-004**: Controller endpoint calls service method
-- **TASK-004, TASK-005 → TASK-006, TASK-007**: Tests require implementations
+- **P2-001 → P2-002**: Exception handler needs exception classes
+- **P2-002 → P2-003**: Controller relies on exception handler for error responses
+- **P2-003 → P2-004**: Controller endpoint calls service method
+- **P2-004, P2-005 → P2-006, P2-007**: Tests require implementations
 
 ## Integration Points
 

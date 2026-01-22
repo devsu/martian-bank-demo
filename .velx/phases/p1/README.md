@@ -21,7 +21,7 @@ Phase-01 establishes the foundational Spring Boot architecture with a **top-to-b
 - **service-layer**: Business logic services and utilities
 - **data-layer**: MongoDB document models and repository interfaces
 - **configuration**: MongoDB connection and data seeding
-- **testing**: Unit tests and smoke tests for validation
+- **testing**: Unit tests and manual validation
 
 ## Task Summary
 
@@ -46,8 +46,8 @@ Phase-01 establishes the foundational Spring Boot architecture with a **top-to-b
 - 0 [MANUAL] human-required tasks
 
 ### data-layer
-- 2 tasks total
-- 2 [AI] automated tasks
+- 3 tasks total
+- 3 [AI] automated tasks
 - 0 [MANUAL] human-required tasks
 
 ### configuration
@@ -56,56 +56,55 @@ Phase-01 establishes the foundational Spring Boot architecture with a **top-to-b
 - 0 [MANUAL] human-required tasks
 
 ### testing
-- 3 tasks total
-- 2 [AI] automated tasks
+- 2 tasks total
+- 1 [AI] automated tasks
 - 1 [MANUAL] human-required tasks
 
 ## Execution Order
 
 1. **Docker Infrastructure** (PREREQUISITE FOR ALL DEVELOPMENT):
-   - [TASK-001] - [AI] Create multi-stage Dockerfile for Java service
-   - [TASK-002] - [AI] Configure .dockerignore and build optimization
-   - [TASK-003] - [AI] Update docker-compose.yml to add Java ATM Locator service
-   - [TASK-004] - [MANUAL] Verify Docker build and container startup
+   - [P1-001] - [AI] Create multi-stage Dockerfile for Java service
+   - [P1-002] - [AI] Configure .dockerignore and build optimization
+   - [P1-003] - [AI] Update docker-compose.yml to add Java ATM Locator service
+   - [P1-004] - [MANUAL] Verify Docker build and container startup
 
 2. **Project Foundation**:
-   - [TASK-005] - [AI] Initialize Spring Boot project with Gradle wrapper
-   - [TASK-006] - [AI] Create layer-based package structure
+   - [P1-005] - [AI] Initialize Spring Boot project with Gradle wrapper
+   - [P1-006] - [AI] Create layer-based package structure
 
 3. **Controller Layer** (API Surface - BUILD FIRST):
-   - [TASK-007] - [AI] Create AtmSearchRequest and AtmResponse DTOs
-   - [TASK-008] - [AI] Implement AtmController with POST endpoint (mocked response initially)
-   - [TASK-009] - [AI] Configure CORS settings
+   - [P1-007] - [AI] Create AtmSearchRequest and AtmResponse DTOs
+   - [P1-008] - [AI] Implement AtmController with POST endpoint (mocked response initially)
+   - [P1-009] - [AI] Configure CORS settings
 
 4. **Service Layer** (Business Logic):
-   - [TASK-010] - [AI] Implement RandomizationUtils
-   - [TASK-011] - [AI] Create AtmService interface and implementation
-   - [TASK-012] - [AI] Wire AtmController to AtmService (replace mocked response)
+   - [P1-010] - [AI] Implement RandomizationUtils
+   - [P1-011] - [AI] Create AtmService interface and implementation
+   - [P1-012] - [AI] Wire AtmController to AtmService (replace mocked response)
 
 5. **Data Layer** (Persistence):
-   - [TASK-013] - [AI] Create Atm entity with nested models
-   - [TASK-014] - [AI] Implement AtmRepository interface
-   - [TASK-015] - [AI] Wire AtmService to AtmRepository (replace mocked data)
+   - [P1-013] - [AI] Create Atm entity with nested models
+   - [P1-014] - [AI] Implement AtmRepository interface
+   - [P1-015] - [AI] Wire AtmService to AtmRepository (replace mocked data)
 
 6. **Configuration** (Database Connection):
-   - [TASK-016] - [AI] Configure MongoDB connection with environment variables
-   - [TASK-017] - [AI] Implement DataSeederConfig with ApplicationRunner
+   - [P1-016] - [AI] Configure MongoDB connection with environment variables
+   - [P1-017] - [AI] Implement DataSeederConfig with ApplicationRunner
 
 7. **Testing and Validation**:
-   - [TASK-018] - [AI] Write unit tests for AtmService
-   - [TASK-019] - [AI] Create smoke test scripts for container validation
-   - [TASK-020] - [MANUAL] Perform manual endpoint validation via Docker
+   - [P1-018] - [AI] Write unit tests for AtmService
+   - [P1-019] - [MANUAL] Perform manual endpoint validation via Docker
 
 ## Cross-Component Dependencies
 
 - **Docker Infrastructure → All**: All development depends on Docker being configured first
-- **TASK-007 → TASK-008**: Controller needs DTOs for request/response
-- **TASK-008 → TASK-012**: Controller initially returns mocked data, then wired to service
-- **TASK-011 → TASK-012**: Service implementation needed before wiring to controller
-- **TASK-013 → TASK-014**: Repository needs entity definition
-- **TASK-014 → TASK-015**: Service needs repository to replace mocked data
-- **TASK-016 → TASK-017**: Data seeding requires MongoDB connection
-- **TASK-017 → TASK-020**: Manual validation requires seeded data
+- **P1-007 → P1-008**: Controller needs DTOs for request/response
+- **P1-008 → P1-012**: Controller initially returns mocked data, then wired to service
+- **P1-011 → P1-012**: Service implementation needed before wiring to controller
+- **P1-013 → P1-014**: Repository needs entity definition
+- **P1-014 → P1-015**: Service needs repository to replace mocked data
+- **P1-016 → P1-017**: Data seeding requires MongoDB connection
+- **P1-017 → P1-019**: Manual validation requires seeded data
 
 ## Integration Points
 

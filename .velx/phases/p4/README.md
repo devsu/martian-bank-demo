@@ -5,7 +5,7 @@ Final deployment phase that replaces the Node.js ATM Locator service with the Ja
 ## Components
 
 - **cutover**: Switch from Node.js to Java service in docker-compose
-- **smoke-tests**: Extended validation scripts for production cutover
+- **performance-testing**: Locust load tests mirroring Node.js test coverage
 - **documentation**: Deployment procedures, rollback plans, and troubleshooting guides
 
 ## Task Summary
@@ -15,7 +15,7 @@ Final deployment phase that replaces the Node.js ATM Locator service with the Ja
 - 1 [AI] automated tasks
 - 1 [MANUAL] human-required tasks
 
-### smoke-tests
+### performance-testing
 - 1 task total
 - 1 [AI] automated task
 - 0 [MANUAL] human-required tasks
@@ -28,23 +28,23 @@ Final deployment phase that replaces the Node.js ATM Locator service with the Ja
 ## Execution Order
 
 1. **Cutover Preparation**:
-   - [TASK-001] - [AI] Update docker-compose.yml to replace Node.js with Java service
-   - [TASK-002] - [MANUAL] Coordinate cutover schedule and perform service switch
+   - [P4-001] - [AI] Update docker-compose.yml to replace Node.js with Java service
+   - [P4-002] - [MANUAL] Coordinate cutover schedule and perform service switch
 
-2. **Validation**:
-   - [TASK-003] - [AI] Create comprehensive production smoke test suite
+2. **Performance Testing**:
+   - [P4-003] - [AI] Create Locust performance test for Java ATM Locator service
 
 3. **Documentation**:
-   - [TASK-004] - [AI] Create step-by-step deployment documentation
-   - [TASK-005] - [AI] Document rollback procedures and troubleshooting guide
-   - [TASK-006] - [MANUAL] Review and validate deployment procedures with team
+   - [P4-004] - [AI] Create step-by-step deployment documentation
+   - [P4-005] - [AI] Document rollback procedures and troubleshooting guide
+   - [P4-006] - [MANUAL] Review and validate deployment procedures with team
 
 ## Cross-Component Dependencies
 
 - All Phase-01, Phase-02, and Phase-03 tasks must be complete
-- [TASK-001] must complete before [TASK-002] (compose config needed for cutover)
-- [TASK-003] supports [TASK-002] (smoke tests validate cutover success)
-- [TASK-004] and [TASK-005] should be complete before [TASK-006] (docs needed for review)
+- [P4-001] must complete before [P4-002] (compose config needed for cutover)
+- [P4-003] should complete before [P4-002] (performance validated before cutover)
+- [P4-004] and [P4-005] should be complete before [P4-006] (docs needed for review)
 
 ## Integration Points
 
