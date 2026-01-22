@@ -56,19 +56,43 @@ services:
     networks:
       - bankapp-network
 
+  # ORIGINAL NODE.JS ATM LOCATOR - REPLACED BY JAVA VERSION
+  # atm-locator:
+  #   build:
+  #     context: ./atm-locator
+  #   container_name: atm-locator
+  #   hostname: martian-bank-atm-locator
+  #   image: martian-bank-atm-locator
+  #   ports:
+  #     - "8001:8001"
+  #   env_file:
+  #     - ./atm-locator/.env
+  #   restart: always
+  #   networks:
+  #     - bankapp-network
+
+  # Java ATM Locator Service (Spring Boot)
   atm-locator:
     build:
-      context: ./atm-locator
+      context: ./atm-locator-java
     container_name: atm-locator
-    hostname: martian-bank-atm-locator
-    image: martian-bank-atm-locator
+    hostname: atm-locator
+    image: martian-bank-atm-locator-java
     ports:
       - "8001:8001"
-    env_file:
-      - ./atm-locator/.env
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://root:example@mongo:27017/martianbank?authSource=admin
+    depends_on:
+      - mongo
     restart: always
     networks:
       - bankapp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
   
   dashboard:
     container_name: dashboard

@@ -1,0 +1,49 @@
+# Build artifacts
+build/
+.gradle/
+out/
+target/
+bin/
+*.jar
+*.war
+*.class
+
+# IDE files
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+*.swp
+*.swo
+.vscode/
+*.code-workspace
+
+# Git files
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+docs/
+LICENSE
+README*
+
+# Test and development files
+src/test/
+**/test/
+**/*Test.java
+**/*Tests.java
+
+# Misc
+.env*
+.DS_Store
+Thumbs.db
+*.log
+tmp/
+temp/
+docker-compose*.yml
+Dockerfile*
+
+# Keep gradle wrapper (do not exclude gradle/wrapper/)
