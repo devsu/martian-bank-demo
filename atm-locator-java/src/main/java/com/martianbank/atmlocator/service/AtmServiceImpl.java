@@ -4,137 +4,118 @@ import com.martianbank.atmlocator.dto.AddressResponse;
 import com.martianbank.atmlocator.dto.AtmResponse;
 import com.martianbank.atmlocator.dto.AtmSearchRequest;
 import com.martianbank.atmlocator.dto.CoordinatesResponse;
+import com.martianbank.atmlocator.model.Atm;
+import com.martianbank.atmlocator.repository.AtmRepository;
 import com.martianbank.atmlocator.util.RandomizationUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * Implementation of AtmService providing ATM location operations.
- * Currently uses mocked data for initial development and testing.
+ * Fetches ATM data from MongoDB via AtmRepository.
  */
 @Service
 public class AtmServiceImpl implements AtmService {
 
     private static final int MAX_RESULTS = 4;
 
-    // Mocked Earth-based ATM data
-    private static final List<AtmResponse> EARTH_ATMS = List.of(
-            new AtmResponse(
-                    "507f1f77bcf86cd799439011",
-                    "Martian Bank ATM - Downtown",
-                    new CoordinatesResponse(37.7749, -122.4194),
-                    new AddressResponse("123 Main St", "San Francisco", "CA", "94102"),
-                    true
-            ),
-            new AtmResponse(
-                    "507f1f77bcf86cd799439012",
-                    "Martian Bank ATM - Financial District",
-                    new CoordinatesResponse(37.7899, -122.4014),
-                    new AddressResponse("456 Market St", "San Francisco", "CA", "94103"),
-                    true
-            ),
-            new AtmResponse(
-                    "507f1f77bcf86cd799439013",
-                    "Martian Bank ATM - Mission Bay",
-                    new CoordinatesResponse(37.7707, -122.3912),
-                    new AddressResponse("789 Berry St", "San Francisco", "CA", "94158"),
-                    false
-            ),
-            new AtmResponse(
-                    "507f1f77bcf86cd799439014",
-                    "Martian Bank ATM - Castro",
-                    new CoordinatesResponse(37.7609, -122.4350),
-                    new AddressResponse("321 Castro St", "San Francisco", "CA", "94114"),
-                    true
-            ),
-            new AtmResponse(
-                    "507f1f77bcf86cd799439015",
-                    "Martian Bank ATM - SOMA",
-                    new CoordinatesResponse(37.7785, -122.4056),
-                    new AddressResponse("500 Howard St", "San Francisco", "CA", "94105"),
-                    false
-            ),
-            new AtmResponse(
-                    "507f1f77bcf86cd799439016",
-                    "Martian Bank ATM - Nob Hill",
-                    new CoordinatesResponse(37.7930, -122.4161),
-                    new AddressResponse("1000 California St", "San Francisco", "CA", "94108"),
-                    true
-            )
-    );
+    private final AtmRepository atmRepository;
 
-    // Mocked interplanetary ATM data
-    private static final List<AtmResponse> INTERPLANETARY_ATMS = List.of(
-            new AtmResponse(
-                    "507f1f77bcf86cd799439101",
-                    "Martian Bank ATM - Olympus Mons Base",
-                    new CoordinatesResponse(18.65, -133.8),
-                    new AddressResponse("1 Olympus Plaza", "Olympus City", "Mars", "MRS-001"),
-                    true
-            ),
-            new AtmResponse(
-                    "507f1f77bcf86cd799439102",
-                    "Martian Bank ATM - Valles Marineris Station",
-                    new CoordinatesResponse(-14.0, -70.0),
-                    new AddressResponse("Canyon View Drive", "Marineris Central", "Mars", "MRS-002"),
-                    true
-            ),
-            new AtmResponse(
-                    "507f1f77bcf86cd799439103",
-                    "Martian Bank ATM - Hellas Basin Colony",
-                    new CoordinatesResponse(-42.7, 70.0),
-                    new AddressResponse("100 Crater Rim Road", "Hellas City", "Mars", "MRS-003"),
-                    false
-            ),
-            new AtmResponse(
-                    "507f1f77bcf86cd799439104",
-                    "Martian Bank ATM - Phobos Orbital Station",
-                    new CoordinatesResponse(0.0, 0.0),
-                    new AddressResponse("Orbital Deck 7", "Phobos Station", "Phobos", "PHB-001"),
-                    true
-            ),
-            new AtmResponse(
-                    "507f1f77bcf86cd799439105",
-                    "Martian Bank ATM - Europa Subsurface Hub",
-                    new CoordinatesResponse(-10.3, 85.2),
-                    new AddressResponse("Ice Shell Level 3", "Europa Base Alpha", "Europa", "EUR-001"),
-                    false
-            ),
-            new AtmResponse(
-                    "507f1f77bcf86cd799439106",
-                    "Martian Bank ATM - Titan Dome",
-                    new CoordinatesResponse(25.0, -45.0),
-                    new AddressResponse("Methane Lake View", "Titan Settlement", "Titan", "TTN-001"),
-                    true
-            )
-    );
+    /**
+     * Constructor injection for AtmRepository.
+     *
+     * @param atmRepository the repository for ATM data access
+     */
+    public AtmServiceImpl(AtmRepository atmRepository) {
+        this.atmRepository = atmRepository;
+    }
 
     @Override
     public List<AtmResponse> findAtms(AtmSearchRequest request) {
-        // Determine which ATM list to use based on isInterPlanetary filter
-        List<AtmResponse> sourceAtms = getSourceAtms(request);
+        // Fetch all ATMs from the repository
+        List<Atm> allAtms = atmRepository.findAll();
+
+        // Convert entities to DTOs
+        List<AtmResponse> atmResponses = allAtms.stream()
+                .map(this::mapToAtmResponse)
+                .collect(Collectors.toList());
+
+        // Filter by isInterPlanetary (default: non-interplanetary)
+        List<AtmResponse> filteredByPlanetary = filterByInterPlanetary(atmResponses, allAtms, request);
 
         // Apply isOpenNow filter if specified
-        List<AtmResponse> filteredAtms = applyOpenNowFilter(sourceAtms, request);
+        List<AtmResponse> filteredAtms = applyOpenNowFilter(filteredByPlanetary, request);
 
         // Select random subset up to MAX_RESULTS
         return RandomizationUtils.selectRandom(filteredAtms, MAX_RESULTS);
     }
 
     /**
-     * Gets the source ATM list based on the isInterPlanetary filter.
+     * Maps an Atm entity to an AtmResponse DTO.
      *
-     * @param request the search request
-     * @return the appropriate ATM list (Earth or interplanetary)
+     * @param atm the ATM entity to convert
+     * @return the corresponding AtmResponse DTO
      */
-    private List<AtmResponse> getSourceAtms(AtmSearchRequest request) {
-        if (request != null && Boolean.TRUE.equals(request.isInterPlanetary())) {
-            return new ArrayList<>(INTERPLANETARY_ATMS);
+    private AtmResponse mapToAtmResponse(Atm atm) {
+        CoordinatesResponse coordinates = null;
+        AddressResponse address = null;
+
+        if (atm.getCoordinates() != null) {
+            coordinates = new CoordinatesResponse(
+                    atm.getCoordinates().getLatitude(),
+                    atm.getCoordinates().getLongitude()
+            );
         }
-        return new ArrayList<>(EARTH_ATMS);
+
+        if (atm.getAddress() != null) {
+            address = new AddressResponse(
+                    atm.getAddress().getStreet(),
+                    atm.getAddress().getCity(),
+                    atm.getAddress().getState(),
+                    atm.getAddress().getZip()
+            );
+        }
+
+        return new AtmResponse(
+                atm.getId(),
+                atm.getName(),
+                coordinates,
+                address,
+                atm.getIsOpenNow()
+        );
+    }
+
+    /**
+     * Filters ATM responses based on the isInterPlanetary flag.
+     * By default, returns non-interplanetary ATMs.
+     *
+     * @param atmResponses the list of ATM responses
+     * @param entities     the corresponding ATM entities (for checking interPlanetary flag)
+     * @param request      the search request containing the filter
+     * @return filtered list of ATM responses
+     */
+    private List<AtmResponse> filterByInterPlanetary(List<AtmResponse> atmResponses, List<Atm> entities, AtmSearchRequest request) {
+        boolean wantInterPlanetary = request != null && Boolean.TRUE.equals(request.isInterPlanetary());
+
+        // Create a map of entity IDs to their interPlanetary status
+        return atmResponses.stream()
+                .filter(response -> {
+                    // Find the corresponding entity
+                    Atm entity = entities.stream()
+                            .filter(e -> e.getId().equals(response.id()))
+                            .findFirst()
+                            .orElse(null);
+
+                    if (entity == null) {
+                        return false;
+                    }
+
+                    boolean isInterPlanetary = Boolean.TRUE.equals(entity.getIsInterPlanetary());
+                    return wantInterPlanetary == isInterPlanetary;
+                })
+                .collect(Collectors.toList());
     }
 
     /**

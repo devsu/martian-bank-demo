@@ -86,7 +86,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://root:example@mongo:27017/martianbank?authSource=admin
+      SPRING_DATA_MONGODB_URI: mongodb://root:example@mongo:27017/test?authSource=admin
     depends_on:
       - mongo
     restart: always
