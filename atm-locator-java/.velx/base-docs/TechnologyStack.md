@@ -50,10 +50,11 @@ The technology stack for the migrated ATM Locator service prioritizes mature, we
 
 ### Java Runtime
 - **Technology**: OpenJDK
-- **Version**: 17 LTS (minimum), 21 LTS (recommended)
-- **Rationale**: Java 17 is the current LTS version with long-term support until 2029. Provides modern language features like records, pattern matching, and improved performance. Java 21 offers virtual threads for better concurrency if needed.
+- **Version**: 25
+- **Rationale**: Java 25 provides the latest language features, performance improvements, and modern capabilities. Includes enhanced pattern matching, virtual threads, and improved concurrency support for better application performance.
 - **Alternatives Considered**:
-  - Java 11: Still supported but missing modern language features
+  - Java 17 LTS: Older LTS version with long-term support but missing latest features
+  - Java 21 LTS: Previous LTS version but superseded by Java 25 for this project
   - GraalVM: Adds complexity without clear benefits for this use case
 
 ## Infrastructure and Deployment
@@ -101,6 +102,6 @@ Not applicable - this is a new Java implementation replacing the existing Node.j
 
 ### Technical Constraints
 - **MongoDB Compatibility**: Spring Data MongoDB supports all MongoDB versions compatible with the existing Node.js service
-- **Java Version**: Must run on Java 11 or higher per requirements; recommend Java 17 LTS for modern features and long-term support
+- **Java Version**: Java 25 is required for this project to leverage the latest language features and performance improvements
 - **Container Support**: Spring Boot applications naturally support containerization with minimal configuration
 - **Port Configuration**: Spring Boot supports port configuration via environment variables or properties, maintaining compatibility with port 8001
