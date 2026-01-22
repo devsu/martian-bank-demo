@@ -14,4 +14,4 @@ Modify `atm-locator` service to use `./atm-locator-java` build context on port 8
 
 ### [P4-002] - [MANUAL] Coordinate cutover schedule and perform service switch
 
-Schedule cutover window during low-traffic period. Stop Node.js service, rebuild with Java, start Java service, verify health endpoint, run smoke tests, verify NGINX routing, confirm with stakeholders.
+Schedule cutover window during low-traffic period. Stop Node.js service, rebuild with Java, start Java service, verify health endpoint, run performance tests, verify NGINX routing, confirm with stakeholders.
