@@ -1,9 +1,8 @@
 package com.martianbank.atmlocator.controller;
 
-import com.martianbank.atmlocator.dto.AddressResponse;
 import com.martianbank.atmlocator.dto.AtmResponse;
 import com.martianbank.atmlocator.dto.AtmSearchRequest;
-import com.martianbank.atmlocator.dto.CoordinatesResponse;
+import com.martianbank.atmlocator.service.AtmService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +19,17 @@ import java.util.List;
 @RequestMapping("/api/atm")
 public class AtmController {
 
+    private final AtmService atmService;
+
+    /**
+     * Constructs an AtmController with the required service dependency.
+     *
+     * @param atmService the ATM service for handling business logic
+     */
+    public AtmController(AtmService atmService) {
+        this.atmService = atmService;
+    }
+
     /**
      * Get a list of ATMs based on optional filters.
      * Returns up to 4 randomly selected ATMs based on the provided criteria.
@@ -31,38 +41,7 @@ public class AtmController {
     public ResponseEntity<List<AtmResponse>> getAtms(
             @RequestBody(required = false) AtmSearchRequest request) {
 
-        // Mocked ATM data for initial API contract validation
-        List<AtmResponse> mockedAtms = List.of(
-                new AtmResponse(
-                        "507f1f77bcf86cd799439011",
-                        "Martian Bank ATM - Downtown",
-                        new CoordinatesResponse(37.7749, -122.4194),
-                        new AddressResponse("123 Main St", "San Francisco", "CA", "94102"),
-                        true
-                ),
-                new AtmResponse(
-                        "507f1f77bcf86cd799439012",
-                        "Martian Bank ATM - Financial District",
-                        new CoordinatesResponse(37.7899, -122.4014),
-                        new AddressResponse("456 Market St", "San Francisco", "CA", "94103"),
-                        true
-                ),
-                new AtmResponse(
-                        "507f1f77bcf86cd799439013",
-                        "Martian Bank ATM - Mission Bay",
-                        new CoordinatesResponse(37.7707, -122.3912),
-                        new AddressResponse("789 Berry St", "San Francisco", "CA", "94158"),
-                        false
-                ),
-                new AtmResponse(
-                        "507f1f77bcf86cd799439014",
-                        "Martian Bank ATM - Castro",
-                        new CoordinatesResponse(37.7609, -122.4350),
-                        new AddressResponse("321 Castro St", "San Francisco", "CA", "94114"),
-                        true
-                )
-        );
-
-        return ResponseEntity.ok(mockedAtms);
+        List<AtmResponse> atms = atmService.findAtms(request);
+        return ResponseEntity.ok(atms);
     }
 }
