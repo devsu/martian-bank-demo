@@ -1,5 +1,6 @@
 package com.martianbank.atmlocator.service;
 
+import com.martianbank.atmlocator.dto.AtmDetailsResponse;
 import com.martianbank.atmlocator.dto.AtmResponse;
 import com.martianbank.atmlocator.dto.AtmSearchRequest;
 
@@ -19,4 +20,14 @@ public interface AtmService {
      * @return a list of ATM responses matching the criteria, up to 4 results
      */
     List<AtmResponse> findAtms(AtmSearchRequest request);
+
+    /**
+     * Finds a specific ATM by its MongoDB ObjectId.
+     *
+     * @param id the MongoDB ObjectId of the ATM
+     * @return detailed ATM information
+     * @throws com.martianbank.atmlocator.exception.InvalidObjectIdException if the ID format is invalid
+     * @throws com.martianbank.atmlocator.exception.AtmNotFoundException if no ATM is found with the given ID
+     */
+    AtmDetailsResponse findById(String id);
 }

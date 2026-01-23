@@ -67,7 +67,8 @@ class AtmControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
                     .andExpect(status().isNotFound())
-                    .andExpect(content().string("No ATMs found"));
+                    .andExpect(jsonPath("$.message").value("No ATMs found"))
+                    .andExpect(jsonPath("$.stack").isEmpty());
         }
 
         @Test
@@ -77,8 +78,8 @@ class AtmControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{invalid json}"))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.title").value("Bad Request"))
-                    .andExpect(jsonPath("$.detail").value("Malformed JSON request"));
+                    .andExpect(jsonPath("$.message").value("Malformed JSON request"))
+                    .andExpect(jsonPath("$.stack").isEmpty());
         }
 
         @Test
