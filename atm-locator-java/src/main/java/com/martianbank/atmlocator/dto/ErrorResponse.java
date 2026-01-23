@@ -1,5 +1,7 @@
 package com.martianbank.atmlocator.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Standard error response format for the ATM Locator API.
  * Maps to the ErrorResponse schema in the OpenAPI specification.
@@ -7,8 +9,12 @@ package com.martianbank.atmlocator.dto;
  * @param message Error message describing what went wrong
  * @param stack   Stack trace (only included in non-production environments, nullable)
  */
+@Schema(description = "Standard error response format")
 public record ErrorResponse(
+        @Schema(description = "Error message describing what went wrong", example = "Resource not found", requiredMode = Schema.RequiredMode.REQUIRED)
         String message,
+
+        @Schema(description = "Stack trace (only included in non-production environments)", example = "null", nullable = true)
         String stack
 ) {
     /**
