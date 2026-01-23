@@ -43,122 +43,41 @@ class AtmServiceTest {
         sampleAtms = createSampleAtms();
     }
 
+    private Atm buildAtm(String id, String name, boolean open, boolean interplanetary) {
+        return Atm.builder()
+                .id(id)
+                .name(name)
+                .isOpenNow(open)
+                .isInterPlanetary(interplanetary)
+                .build();
+    }
+
+    private Atm buildAtmWithAddress(String id, String name, boolean open, boolean interplanetary,
+                                     String street, String city, String state, String zip,
+                                     double lat, double lng) {
+        return Atm.builder()
+                .id(id)
+                .name(name)
+                .address(Address.builder().street(street).city(city).state(state).zip(zip).build())
+                .coordinates(Coordinates.builder().latitude(lat).longitude(lng).build())
+                .isOpenNow(open)
+                .isInterPlanetary(interplanetary)
+                .build();
+    }
+
     /**
      * Creates a list of sample ATMs for testing.
      * Includes various combinations of isOpen and isInterPlanetary states.
      */
     private List<Atm> createSampleAtms() {
-        List<Atm> atms = new ArrayList<>();
-
-        // ATM 1: Open, Non-interplanetary (Mars)
-        atms.add(Atm.builder()
-                .id("1")
-                .name("Martian ATM (Highway)")
-                .address(Address.builder()
-                        .street("14th Street, Martian Way")
-                        .city("Musk City")
-                        .state("Mars")
-                        .zip("40411")
-                        .build())
-                .coordinates(Coordinates.builder()
-                        .latitude(37.775)
-                        .longitude(-81.188)
-                        .build())
-                .isOpenNow(true)
-                .isInterPlanetary(false)
-                .build());
-
-        // ATM 2: Closed, Non-interplanetary (Mars)
-        atms.add(Atm.builder()
-                .id("2")
-                .name("Martian ATM (Theater)")
-                .address(Address.builder()
-                        .street("25th Street, Theater Lane")
-                        .city("Musk City")
-                        .state("Mars")
-                        .zip("40412")
-                        .build())
-                .coordinates(Coordinates.builder()
-                        .latitude(37.780)
-                        .longitude(-81.190)
-                        .build())
-                .isOpenNow(false)
-                .isInterPlanetary(false)
-                .build());
-
-        // ATM 3: Open, Interplanetary (Earth)
-        atms.add(Atm.builder()
-                .id("3")
-                .name("Earthern ATM (Georgia Tech)")
-                .address(Address.builder()
-                        .street("North Avenue NW")
-                        .city("Atlanta")
-                        .state("Georgia")
-                        .zip("30332")
-                        .build())
-                .coordinates(Coordinates.builder()
-                        .latitude(33.775)
-                        .longitude(-84.398)
-                        .build())
-                .isOpenNow(true)
-                .isInterPlanetary(true)
-                .build());
-
-        // ATM 4: Closed, Interplanetary (Saturn)
-        atms.add(Atm.builder()
-                .id("4")
-                .name("Saturn ATM (Mimas Moon)")
-                .address(Address.builder()
-                        .street("Crater Street")
-                        .city("Mimas")
-                        .state("Saturn")
-                        .zip("00001")
-                        .build())
-                .coordinates(Coordinates.builder()
-                        .latitude(0.0)
-                        .longitude(0.0)
-                        .build())
-                .isOpenNow(false)
-                .isInterPlanetary(true)
-                .build());
-
-        // ATM 5: Open, Non-interplanetary (Mars)
-        atms.add(Atm.builder()
-                .id("5")
-                .name("Martian ATM (Courthouse)")
-                .address(Address.builder()
-                        .street("Main Street")
-                        .city("Musk City")
-                        .state("Mars")
-                        .zip("40413")
-                        .build())
-                .coordinates(Coordinates.builder()
-                        .latitude(37.790)
-                        .longitude(-81.200)
-                        .build())
-                .isOpenNow(true)
-                .isInterPlanetary(false)
-                .build());
-
-        // ATM 6: Open, Interplanetary (Neptune)
-        atms.add(Atm.builder()
-                .id("6")
-                .name("Neptune ATM (Triton Base)")
-                .address(Address.builder()
-                        .street("Triton Base Road")
-                        .city("Triton")
-                        .state("Neptune")
-                        .zip("00002")
-                        .build())
-                .coordinates(Coordinates.builder()
-                        .latitude(1.0)
-                        .longitude(1.0)
-                        .build())
-                .isOpenNow(true)
-                .isInterPlanetary(true)
-                .build());
-
-        return atms;
+        return List.of(
+            buildAtm("1", "Martian ATM (Highway)", true, false),      // Open, Non-interplanetary
+            buildAtm("2", "Martian ATM (Theater)", false, false),     // Closed, Non-interplanetary
+            buildAtm("3", "Earthern ATM (Georgia Tech)", true, true), // Open, Interplanetary
+            buildAtm("4", "Saturn ATM (Mimas Moon)", false, true),    // Closed, Interplanetary
+            buildAtm("5", "Martian ATM (Courthouse)", true, false),   // Open, Non-interplanetary
+            buildAtm("6", "Neptune ATM (Triton Base)", true, true)    // Open, Interplanetary
+        );
     }
 
     @Nested
@@ -201,12 +120,7 @@ class AtmServiceTest {
             // Add more non-interplanetary ATMs to test max limit
             List<Atm> manyAtms = new ArrayList<>(sampleAtms);
             for (int i = 7; i <= 15; i++) {
-                manyAtms.add(Atm.builder()
-                        .id(String.valueOf(i))
-                        .name("ATM " + i)
-                        .isOpenNow(true)
-                        .isInterPlanetary(false)
-                        .build());
+                manyAtms.add(buildAtm(String.valueOf(i), "ATM " + i, true, false));
             }
             when(atmRepository.findAll()).thenReturn(manyAtms);
 
@@ -364,30 +278,10 @@ class AtmServiceTest {
         void shouldApplyAndLogicCorrectlyWithLimitedDataset() {
             // Create a minimal dataset to verify AND logic precisely
             List<Atm> limitedAtms = List.of(
-                    Atm.builder()
-                            .id("open-interplanetary")
-                            .name("Open Interplanetary")
-                            .isOpenNow(true)
-                            .isInterPlanetary(true)
-                            .build(),
-                    Atm.builder()
-                            .id("closed-interplanetary")
-                            .name("Closed Interplanetary")
-                            .isOpenNow(false)
-                            .isInterPlanetary(true)
-                            .build(),
-                    Atm.builder()
-                            .id("open-local")
-                            .name("Open Local")
-                            .isOpenNow(true)
-                            .isInterPlanetary(false)
-                            .build(),
-                    Atm.builder()
-                            .id("closed-local")
-                            .name("Closed Local")
-                            .isOpenNow(false)
-                            .isInterPlanetary(false)
-                            .build()
+                    buildAtm("open-interplanetary", "Open Interplanetary", true, true),
+                    buildAtm("closed-interplanetary", "Closed Interplanetary", false, true),
+                    buildAtm("open-local", "Open Local", true, false),
+                    buildAtm("closed-local", "Closed Local", false, false)
             );
             when(atmRepository.findAll()).thenReturn(limitedAtms);
 
@@ -419,18 +313,8 @@ class AtmServiceTest {
         void shouldReturnEmptyListWhenNoAtmsMatchIsOpenNowFilter() {
             // All ATMs are closed
             List<Atm> closedAtms = List.of(
-                    Atm.builder()
-                            .id("1")
-                            .name("Closed ATM 1")
-                            .isOpenNow(false)
-                            .isInterPlanetary(false)
-                            .build(),
-                    Atm.builder()
-                            .id("2")
-                            .name("Closed ATM 2")
-                            .isOpenNow(false)
-                            .isInterPlanetary(false)
-                            .build()
+                    buildAtm("1", "Closed ATM 1", false, false),
+                    buildAtm("2", "Closed ATM 2", false, false)
             );
             when(atmRepository.findAll()).thenReturn(closedAtms);
             AtmSearchRequest request = new AtmSearchRequest(true, false);
@@ -444,14 +328,7 @@ class AtmServiceTest {
         @DisplayName("should return empty list when no ATMs match isInterPlanetary filter")
         void shouldReturnEmptyListWhenNoAtmsMatchIsInterPlanetaryFilter() {
             // All ATMs are non-interplanetary
-            List<Atm> localAtms = List.of(
-                    Atm.builder()
-                            .id("1")
-                            .name("Local ATM 1")
-                            .isOpenNow(true)
-                            .isInterPlanetary(false)
-                            .build()
-            );
+            List<Atm> localAtms = List.of(buildAtm("1", "Local ATM 1", true, false));
             when(atmRepository.findAll()).thenReturn(localAtms);
             AtmSearchRequest request = new AtmSearchRequest(null, true);
 
@@ -465,18 +342,8 @@ class AtmServiceTest {
         void shouldReturnEmptyListWhenNoAtmsMatchCombinedFilters() {
             // No open interplanetary ATMs
             List<Atm> atms = List.of(
-                    Atm.builder()
-                            .id("1")
-                            .name("Closed Interplanetary")
-                            .isOpenNow(false)
-                            .isInterPlanetary(true)
-                            .build(),
-                    Atm.builder()
-                            .id("2")
-                            .name("Open Local")
-                            .isOpenNow(true)
-                            .isInterPlanetary(false)
-                            .build()
+                    buildAtm("1", "Closed Interplanetary", false, true),
+                    buildAtm("2", "Open Local", true, false)
             );
             when(atmRepository.findAll()).thenReturn(atms);
             AtmSearchRequest request = new AtmSearchRequest(true, true);
@@ -534,16 +401,8 @@ class AtmServiceTest {
         @Test
         @DisplayName("should handle ATM with null coordinates and address")
         void shouldHandleAtmWithNullCoordinatesAndAddress() {
-            List<Atm> atmWithNulls = List.of(
-                    Atm.builder()
-                            .id("null-test")
-                            .name("ATM with nulls")
-                            .address(null)
-                            .coordinates(null)
-                            .isOpenNow(true)
-                            .isInterPlanetary(false)
-                            .build()
-            );
+            // buildAtm doesn't set address/coordinates, so they'll be null
+            List<Atm> atmWithNulls = List.of(buildAtm("null-test", "ATM with nulls", true, false));
             when(atmRepository.findAll()).thenReturn(atmWithNulls);
 
             List<AtmResponse> result = atmService.findAtms(new AtmSearchRequest(null, false));
