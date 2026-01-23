@@ -148,11 +148,12 @@ class AtmServiceTest {
             assertThat(openResult.stream().map(AtmResponse::id).toList())
                     .allSatisfy(id -> assertThat(id).isIn("1", "5"));
 
-            // Test isOpenNow=false: should return only closed, non-interplanetary ATMs (ID 2)
-            List<AtmResponse> closedResult = atmService.findAtms(new AtmSearchRequest(false, false));
-            assertThat(closedResult).allSatisfy(atm -> assertThat(atm.isOpen()).isFalse());
-            assertThat(closedResult.stream().map(AtmResponse::id).toList())
-                    .allSatisfy(id -> assertThat(id).isEqualTo("2"));
+            // LEGACY BEHAVIOR: isOpenNow=false means NO filter is applied (same as null)
+            // This matches the legacy Node.js behavior: if (req.body.isOpenNow) { query.isOpen = true; }
+            // So isOpenNow=false should return ALL non-interplanetary ATMs (IDs 1, 2, 5)
+            List<AtmResponse> noFilterResult = atmService.findAtms(new AtmSearchRequest(false, false));
+            assertThat(noFilterResult.stream().map(AtmResponse::id).toList())
+                    .allSatisfy(id -> assertThat(id).isIn("1", "2", "5"));
         }
     }
 
@@ -196,20 +197,24 @@ class AtmServiceTest {
             assertThat(result1).hasSize(1);
             assertThat(result1.get(0).id()).isEqualTo("open-interplanetary");
 
-            // Test: Closed AND Interplanetary
+            // LEGACY BEHAVIOR: isOpenNow=false means NO filter (same as null)
+            // Test: (no open filter) AND Interplanetary -> returns all interplanetary ATMs
             List<AtmResponse> result2 = atmService.findAtms(new AtmSearchRequest(false, true));
-            assertThat(result2).hasSize(1);
-            assertThat(result2.get(0).id()).isEqualTo("closed-interplanetary");
+            assertThat(result2).hasSize(2);
+            assertThat(result2.stream().map(AtmResponse::id).toList())
+                    .containsExactlyInAnyOrder("open-interplanetary", "closed-interplanetary");
 
             // Test: Open AND Non-Interplanetary
             List<AtmResponse> result3 = atmService.findAtms(new AtmSearchRequest(true, false));
             assertThat(result3).hasSize(1);
             assertThat(result3.get(0).id()).isEqualTo("open-local");
 
-            // Test: Closed AND Non-Interplanetary
+            // LEGACY BEHAVIOR: isOpenNow=false means NO filter (same as null)
+            // Test: (no open filter) AND Non-Interplanetary -> returns all local ATMs
             List<AtmResponse> result4 = atmService.findAtms(new AtmSearchRequest(false, false));
-            assertThat(result4).hasSize(1);
-            assertThat(result4.get(0).id()).isEqualTo("closed-local");
+            assertThat(result4).hasSize(2);
+            assertThat(result4.stream().map(AtmResponse::id).toList())
+                    .containsExactlyInAnyOrder("open-local", "closed-local");
         }
     }
 

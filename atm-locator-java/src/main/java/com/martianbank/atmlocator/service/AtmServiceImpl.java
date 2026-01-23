@@ -92,21 +92,27 @@ public class AtmServiceImpl implements AtmService {
 
     /**
      * Checks if ATM matches the isOpenNow filter.
-     * When filter is null, all ATMs pass this filter.
-     * When filter is true, only open ATMs pass.
-     * When filter is false, only closed ATMs pass.
+     *
+     * TECHNICAL DEBT: This behavior is carried over from the legacy Node.js system.
+     * The filter only works in one direction:
+     * - isOpenNow = true  -> filter for open ATMs only
+     * - isOpenNow = false -> no filter applied (returns all ATMs)
+     * - isOpenNow = null  -> no filter applied (returns all ATMs)
+     *
+     * The legacy code used: if (req.body.isOpenNow) { query.isOpen = true; }
+     * which means false is treated the same as null (no filtering).
      *
      * @param atm     the ATM entity to check
      * @param request the search request containing the filter
      * @return true if ATM matches the filter criteria
      */
     private boolean matchesOpenNowFilter(Atm atm, AtmSearchRequest request) {
-        if (request == null || request.isOpenNow() == null) {
-            return true; // No filter applied
+        // Only filter when isOpenNow is explicitly true (legacy behavior)
+        if (request == null || !Boolean.TRUE.equals(request.isOpenNow())) {
+            return true; // No filter applied when null or false
         }
-        boolean wantOpen = Boolean.TRUE.equals(request.isOpenNow());
-        boolean isOpen = Boolean.TRUE.equals(atm.getIsOpenNow());
-        return wantOpen == isOpen;
+        // Filter for open ATMs only
+        return Boolean.TRUE.equals(atm.getIsOpenNow());
     }
 
     /**
