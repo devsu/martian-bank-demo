@@ -4,6 +4,7 @@ import com.martianbank.atmlocator.dto.AddressResponse;
 import com.martianbank.atmlocator.dto.AtmResponse;
 import com.martianbank.atmlocator.dto.AtmSearchRequest;
 import com.martianbank.atmlocator.dto.CoordinatesResponse;
+import com.martianbank.atmlocator.exception.AtmNotFoundException;
 import com.martianbank.atmlocator.model.Atm;
 import com.martianbank.atmlocator.repository.AtmRepository;
 import com.martianbank.atmlocator.util.RandomizationUtils;
@@ -47,6 +48,11 @@ public class AtmServiceImpl implements AtmService {
 
         // Apply isOpenNow filter if specified
         List<AtmResponse> filteredAtms = applyOpenNowFilter(filteredByPlanetary, request);
+
+        // Throw exception if no ATMs match the criteria
+        if (filteredAtms.isEmpty()) {
+            throw new AtmNotFoundException();
+        }
 
         // Select random subset up to MAX_RESULTS
         return RandomizationUtils.selectRandom(filteredAtms, MAX_RESULTS);

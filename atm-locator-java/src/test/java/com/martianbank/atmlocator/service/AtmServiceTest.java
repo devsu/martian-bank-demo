@@ -20,7 +20,10 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
+
+import com.martianbank.atmlocator.exception.AtmNotFoundException;
 
 /**
  * Unit tests for AtmServiceImpl.
@@ -299,18 +302,18 @@ class AtmServiceTest {
     class EmptyResultsTests {
 
         @Test
-        @DisplayName("should return empty list when repository returns empty list")
-        void shouldReturnEmptyListWhenRepositoryReturnsEmpty() {
+        @DisplayName("should throw AtmNotFoundException when repository returns empty list")
+        void shouldThrowAtmNotFoundExceptionWhenRepositoryReturnsEmpty() {
             when(atmRepository.findAll()).thenReturn(Collections.emptyList());
 
-            List<AtmResponse> result = atmService.findAtms(new AtmSearchRequest());
-
-            assertThat(result).isEmpty();
+            assertThatThrownBy(() -> atmService.findAtms(new AtmSearchRequest()))
+                    .isInstanceOf(AtmNotFoundException.class)
+                    .hasMessage("No ATMs found");
         }
 
         @Test
-        @DisplayName("should return empty list when no ATMs match isOpenNow filter")
-        void shouldReturnEmptyListWhenNoAtmsMatchIsOpenNowFilter() {
+        @DisplayName("should throw AtmNotFoundException when no ATMs match isOpenNow filter")
+        void shouldThrowAtmNotFoundExceptionWhenNoAtmsMatchIsOpenNowFilter() {
             // All ATMs are closed
             List<Atm> closedAtms = List.of(
                     buildAtm("1", "Closed ATM 1", false, false),
@@ -319,27 +322,27 @@ class AtmServiceTest {
             when(atmRepository.findAll()).thenReturn(closedAtms);
             AtmSearchRequest request = new AtmSearchRequest(true, false);
 
-            List<AtmResponse> result = atmService.findAtms(request);
-
-            assertThat(result).isEmpty();
+            assertThatThrownBy(() -> atmService.findAtms(request))
+                    .isInstanceOf(AtmNotFoundException.class)
+                    .hasMessage("No ATMs found");
         }
 
         @Test
-        @DisplayName("should return empty list when no ATMs match isInterPlanetary filter")
-        void shouldReturnEmptyListWhenNoAtmsMatchIsInterPlanetaryFilter() {
+        @DisplayName("should throw AtmNotFoundException when no ATMs match isInterPlanetary filter")
+        void shouldThrowAtmNotFoundExceptionWhenNoAtmsMatchIsInterPlanetaryFilter() {
             // All ATMs are non-interplanetary
             List<Atm> localAtms = List.of(buildAtm("1", "Local ATM 1", true, false));
             when(atmRepository.findAll()).thenReturn(localAtms);
             AtmSearchRequest request = new AtmSearchRequest(null, true);
 
-            List<AtmResponse> result = atmService.findAtms(request);
-
-            assertThat(result).isEmpty();
+            assertThatThrownBy(() -> atmService.findAtms(request))
+                    .isInstanceOf(AtmNotFoundException.class)
+                    .hasMessage("No ATMs found");
         }
 
         @Test
-        @DisplayName("should return empty list when no ATMs match combined filters")
-        void shouldReturnEmptyListWhenNoAtmsMatchCombinedFilters() {
+        @DisplayName("should throw AtmNotFoundException when no ATMs match combined filters")
+        void shouldThrowAtmNotFoundExceptionWhenNoAtmsMatchCombinedFilters() {
             // No open interplanetary ATMs
             List<Atm> atms = List.of(
                     buildAtm("1", "Closed Interplanetary", false, true),
@@ -348,9 +351,9 @@ class AtmServiceTest {
             when(atmRepository.findAll()).thenReturn(atms);
             AtmSearchRequest request = new AtmSearchRequest(true, true);
 
-            List<AtmResponse> result = atmService.findAtms(request);
-
-            assertThat(result).isEmpty();
+            assertThatThrownBy(() -> atmService.findAtms(request))
+                    .isInstanceOf(AtmNotFoundException.class)
+                    .hasMessage("No ATMs found");
         }
     }
 
