@@ -1,16 +1,22 @@
 package com.martianbank.atmlocator.service;
 
+import com.martianbank.atmlocator.dto.AtmDetailsResponse;
 import com.martianbank.atmlocator.dto.AtmResponse;
 import com.martianbank.atmlocator.dto.AtmSearchRequest;
+import com.martianbank.atmlocator.exception.AtmNotFoundException;
+import com.martianbank.atmlocator.exception.InvalidObjectIdException;
 import com.martianbank.atmlocator.model.Address;
 import com.martianbank.atmlocator.model.Atm;
 import com.martianbank.atmlocator.model.Coordinates;
+import com.martianbank.atmlocator.model.Timings;
 import com.martianbank.atmlocator.repository.AtmRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -18,12 +24,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import com.martianbank.atmlocator.exception.AtmNotFoundException;
 
 /**
  * Unit tests for AtmServiceImpl.
@@ -416,6 +423,249 @@ class AtmServiceTest {
             assertThat(response.name()).isEqualTo("ATM with nulls");
             assertThat(response.coordinates()).isNull();
             assertThat(response.address()).isNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("findById scenarios")
+    class FindByIdTests {
+
+        private static final String VALID_OBJECT_ID = "507f1f77bcf86cd799439011";
+        private static final String ANOTHER_VALID_OBJECT_ID = "507f1f77bcf86cd799439012";
+
+        @Nested
+        @DisplayName("when ID is valid and ATM exists")
+        class ValidExistingIdTests {
+
+            @Test
+            @DisplayName("should return ATM details when valid existing ID is provided")
+            void shouldReturnAtmDetailsWhenValidExistingIdProvided() {
+                // Arrange
+                Atm atm = buildAtmWithAllDetails(VALID_OBJECT_ID);
+                when(atmRepository.findById(VALID_OBJECT_ID)).thenReturn(Optional.of(atm));
+
+                // Act
+                AtmDetailsResponse result = atmService.findById(VALID_OBJECT_ID);
+
+                // Assert
+                assertThat(result).isNotNull();
+                assertThat(result.isOpen()).isTrue();
+                assertThat(result.atmHours()).isEqualTo("24 hours");
+                assertThat(result.numberOfATMs()).isEqualTo(3);
+                verify(atmRepository).findById(VALID_OBJECT_ID);
+            }
+
+            @Test
+            @DisplayName("should correctly map coordinates to response")
+            void shouldCorrectlyMapCoordinatesToResponse() {
+                // Arrange
+                Atm atm = buildAtmWithAllDetails(VALID_OBJECT_ID);
+                when(atmRepository.findById(VALID_OBJECT_ID)).thenReturn(Optional.of(atm));
+
+                // Act
+                AtmDetailsResponse result = atmService.findById(VALID_OBJECT_ID);
+
+                // Assert
+                assertThat(result.coordinates()).isNotNull();
+                assertThat(result.coordinates().latitude()).isEqualTo(37.7749);
+                assertThat(result.coordinates().longitude()).isEqualTo(-122.4194);
+            }
+
+            @Test
+            @DisplayName("should correctly map timings to response")
+            void shouldCorrectlyMapTimingsToResponse() {
+                // Arrange
+                Atm atm = buildAtmWithAllDetails(VALID_OBJECT_ID);
+                when(atmRepository.findById(VALID_OBJECT_ID)).thenReturn(Optional.of(atm));
+
+                // Act
+                AtmDetailsResponse result = atmService.findById(VALID_OBJECT_ID);
+
+                // Assert
+                assertThat(result.timings()).isNotNull();
+                assertThat(result.timings().monFri()).isEqualTo("9:00 AM - 6:00 PM");
+                assertThat(result.timings().satSun()).isEqualTo("10:00 AM - 4:00 PM");
+                assertThat(result.timings().holidays()).isEqualTo("Closed");
+            }
+
+            @Test
+            @DisplayName("should handle ATM with null coordinates")
+            void shouldHandleAtmWithNullCoordinates() {
+                // Arrange
+                Atm atm = Atm.builder()
+                        .id(VALID_OBJECT_ID)
+                        .name("Test ATM")
+                        .isOpenNow(true)
+                        .atmHours("24 hours")
+                        .numberOfATMs(2)
+                        .timings(Timings.builder()
+                                .monFri("9:00 AM - 5:00 PM")
+                                .satSun("10:00 AM - 3:00 PM")
+                                .build())
+                        .build();
+                when(atmRepository.findById(VALID_OBJECT_ID)).thenReturn(Optional.of(atm));
+
+                // Act
+                AtmDetailsResponse result = atmService.findById(VALID_OBJECT_ID);
+
+                // Assert
+                assertThat(result).isNotNull();
+                assertThat(result.coordinates()).isNull();
+                assertThat(result.timings()).isNotNull();
+            }
+
+            @Test
+            @DisplayName("should handle ATM with null timings")
+            void shouldHandleAtmWithNullTimings() {
+                // Arrange
+                Atm atm = Atm.builder()
+                        .id(VALID_OBJECT_ID)
+                        .name("Test ATM")
+                        .isOpenNow(false)
+                        .atmHours("9:00 AM - 5:00 PM")
+                        .numberOfATMs(1)
+                        .coordinates(Coordinates.builder()
+                                .latitude(40.7128)
+                                .longitude(-74.0060)
+                                .build())
+                        .build();
+                when(atmRepository.findById(VALID_OBJECT_ID)).thenReturn(Optional.of(atm));
+
+                // Act
+                AtmDetailsResponse result = atmService.findById(VALID_OBJECT_ID);
+
+                // Assert
+                assertThat(result).isNotNull();
+                assertThat(result.timings()).isNull();
+                assertThat(result.coordinates()).isNotNull();
+            }
+        }
+
+        @Nested
+        @DisplayName("when ID is valid but ATM does not exist")
+        class ValidNonExistentIdTests {
+
+            @Test
+            @DisplayName("should throw AtmNotFoundException when ATM does not exist")
+            void shouldThrowAtmNotFoundExceptionWhenAtmDoesNotExist() {
+                // Arrange
+                when(atmRepository.findById(VALID_OBJECT_ID)).thenReturn(Optional.empty());
+
+                // Act & Assert
+                assertThatThrownBy(() -> atmService.findById(VALID_OBJECT_ID))
+                        .isInstanceOf(AtmNotFoundException.class)
+                        .hasMessage("ATM information not found");
+                verify(atmRepository).findById(VALID_OBJECT_ID);
+            }
+
+            @Test
+            @DisplayName("should throw AtmNotFoundException with correct message for different valid IDs")
+            void shouldThrowAtmNotFoundExceptionForDifferentValidIds() {
+                // Arrange
+                when(atmRepository.findById(ANOTHER_VALID_OBJECT_ID)).thenReturn(Optional.empty());
+
+                // Act & Assert
+                assertThatThrownBy(() -> atmService.findById(ANOTHER_VALID_OBJECT_ID))
+                        .isInstanceOf(AtmNotFoundException.class)
+                        .hasMessage("ATM information not found");
+            }
+        }
+
+        @Nested
+        @DisplayName("when ID format is invalid")
+        class InvalidObjectIdFormatTests {
+
+            @ParameterizedTest
+            @ValueSource(strings = {
+                    "invalid-id",
+                    "123",
+                    "xyz",
+                    "507f1f77bcf86cd79943901",   // 23 chars (too short)
+                    "507f1f77bcf86cd7994390111",  // 25 chars (too long)
+                    "ZZZZZZZZZZZZZZZZZZZZZZZZ",   // 24 chars but invalid hex
+                    "507f1f77bcf86cd79943901G",   // Contains non-hex character
+                    "   507f1f77bcf86cd799439011", // Leading spaces
+                    "507f1f77bcf86cd799439011   "  // Trailing spaces
+            })
+            @DisplayName("should throw InvalidObjectIdException for invalid ObjectId formats")
+            void shouldThrowInvalidObjectIdExceptionForInvalidFormats(String invalidId) {
+                // Act & Assert
+                assertThatThrownBy(() -> atmService.findById(invalidId))
+                        .isInstanceOf(InvalidObjectIdException.class)
+                        .hasMessage("Resource not found");
+                verify(atmRepository, never()).findById(invalidId);
+            }
+
+            @Test
+            @DisplayName("should not call repository when ObjectId format is invalid")
+            void shouldNotCallRepositoryWhenObjectIdFormatIsInvalid() {
+                // Act & Assert
+                assertThatThrownBy(() -> atmService.findById("invalid"))
+                        .isInstanceOf(InvalidObjectIdException.class);
+                verify(atmRepository, never()).findById("invalid");
+            }
+        }
+
+        @Nested
+        @DisplayName("when ID is null or empty")
+        class NullAndEmptyIdTests {
+
+            @Test
+            @DisplayName("should throw IllegalArgumentException for null ID")
+            void shouldThrowIllegalArgumentExceptionForNullId() {
+                // Note: ObjectId.isValid(null) throws IllegalArgumentException
+                // This is handled at the controller/framework level with @PathVariable validation
+                // At service level, null input propagates the underlying MongoDB driver behavior
+                assertThatThrownBy(() -> atmService.findById(null))
+                        .isInstanceOf(IllegalArgumentException.class);
+                verify(atmRepository, never()).findById(null);
+            }
+
+            @Test
+            @DisplayName("should throw InvalidObjectIdException for empty ID")
+            void shouldThrowInvalidObjectIdExceptionForEmptyId() {
+                // Act & Assert
+                assertThatThrownBy(() -> atmService.findById(""))
+                        .isInstanceOf(InvalidObjectIdException.class)
+                        .hasMessage("Resource not found");
+                verify(atmRepository, never()).findById("");
+            }
+
+            @Test
+            @DisplayName("should throw InvalidObjectIdException for whitespace-only ID")
+            void shouldThrowInvalidObjectIdExceptionForWhitespaceOnlyId() {
+                // Act & Assert
+                assertThatThrownBy(() -> atmService.findById("   "))
+                        .isInstanceOf(InvalidObjectIdException.class)
+                        .hasMessage("Resource not found");
+                verify(atmRepository, never()).findById("   ");
+            }
+        }
+
+        private Atm buildAtmWithAllDetails(String id) {
+            return Atm.builder()
+                    .id(id)
+                    .name("Test ATM - Full Details")
+                    .address(Address.builder()
+                            .street("123 Main St")
+                            .city("San Francisco")
+                            .state("CA")
+                            .zip("94102")
+                            .build())
+                    .coordinates(Coordinates.builder()
+                            .latitude(37.7749)
+                            .longitude(-122.4194)
+                            .build())
+                    .timings(Timings.builder()
+                            .monFri("9:00 AM - 6:00 PM")
+                            .satSun("10:00 AM - 4:00 PM")
+                            .holidays("Closed")
+                            .build())
+                    .atmHours("24 hours")
+                    .numberOfATMs(3)
+                    .isOpenNow(true)
+                    .isInterPlanetary(false)
+                    .build();
         }
     }
 }
