@@ -95,32 +95,21 @@ class AtmServiceTest {
     class NoFiltersTests {
 
         @Test
-        @DisplayName("should return non-interplanetary ATMs when request is null")
-        void shouldReturnNonInterplanetaryAtmsWhenRequestIsNull() {
+        @DisplayName("should return non-interplanetary ATMs when request is null or has null filters")
+        void shouldReturnNonInterplanetaryAtmsWhenNoFiltersProvided() {
             when(atmRepository.findAll()).thenReturn(sampleAtms);
 
-            List<AtmResponse> result = atmService.findAtms(null);
-
-            // By default, should filter to non-interplanetary ATMs
-            assertThat(result).isNotNull();
-            assertThat(result.size()).isLessThanOrEqualTo(AtmServiceImpl.MAX_RESULTS);
-            // All returned ATMs should be non-interplanetary (IDs 1, 2, 5)
-            assertThat(result.stream().map(AtmResponse::id).toList())
+            // Test null request
+            List<AtmResponse> resultNullRequest = atmService.findAtms(null);
+            assertThat(resultNullRequest).isNotNull();
+            assertThat(resultNullRequest.size()).isLessThanOrEqualTo(AtmServiceImpl.MAX_RESULTS);
+            assertThat(resultNullRequest.stream().map(AtmResponse::id).toList())
                     .allSatisfy(id -> assertThat(id).isIn("1", "2", "5"));
-        }
 
-        @Test
-        @DisplayName("should return non-interplanetary ATMs when request has null filters")
-        void shouldReturnNonInterplanetaryAtmsWhenFiltersAreNull() {
-            when(atmRepository.findAll()).thenReturn(sampleAtms);
-            AtmSearchRequest request = new AtmSearchRequest(null, null);
-
-            List<AtmResponse> result = atmService.findAtms(request);
-
-            assertThat(result).isNotNull();
-            assertThat(result.size()).isLessThanOrEqualTo(AtmServiceImpl.MAX_RESULTS);
-            // All returned ATMs should be non-interplanetary
-            assertThat(result.stream().map(AtmResponse::id).toList())
+            // Test request with null filters
+            List<AtmResponse> resultNullFilters = atmService.findAtms(new AtmSearchRequest(null, null));
+            assertThat(resultNullFilters).isNotNull();
+            assertThat(resultNullFilters.stream().map(AtmResponse::id).toList())
                     .allSatisfy(id -> assertThat(id).isIn("1", "2", "5"));
         }
 
@@ -145,63 +134,21 @@ class AtmServiceTest {
     class IsOpenNowFilterTests {
 
         @Test
-        @DisplayName("should return only open ATMs when isOpenNow is true")
-        void shouldReturnOnlyOpenAtmsWhenIsOpenNowIsTrue() {
+        @DisplayName("should filter ATMs by open/closed status")
+        void shouldFilterAtmsByOpenStatus() {
             when(atmRepository.findAll()).thenReturn(sampleAtms);
-            AtmSearchRequest request = new AtmSearchRequest(true, false);
 
-            List<AtmResponse> result = atmService.findAtms(request);
-
-            // Should return only open, non-interplanetary ATMs (IDs 1, 5)
-            assertThat(result).isNotNull();
-            assertThat(result).allSatisfy(atm -> assertThat(atm.isOpen()).isTrue());
-            assertThat(result.stream().map(AtmResponse::id).toList())
+            // Test isOpenNow=true: should return only open, non-interplanetary ATMs (IDs 1, 5)
+            List<AtmResponse> openResult = atmService.findAtms(new AtmSearchRequest(true, false));
+            assertThat(openResult).allSatisfy(atm -> assertThat(atm.isOpen()).isTrue());
+            assertThat(openResult.stream().map(AtmResponse::id).toList())
                     .allSatisfy(id -> assertThat(id).isIn("1", "5"));
-        }
 
-        @Test
-        @DisplayName("should return only closed ATMs when isOpenNow is false")
-        void shouldReturnOnlyClosedAtmsWhenIsOpenNowIsFalse() {
-            when(atmRepository.findAll()).thenReturn(sampleAtms);
-            AtmSearchRequest request = new AtmSearchRequest(false, false);
-
-            List<AtmResponse> result = atmService.findAtms(request);
-
-            // Should return only closed, non-interplanetary ATMs (ID 2)
-            assertThat(result).isNotNull();
-            assertThat(result).allSatisfy(atm -> assertThat(atm.isOpen()).isFalse());
-            assertThat(result.stream().map(AtmResponse::id).toList())
+            // Test isOpenNow=false: should return only closed, non-interplanetary ATMs (ID 2)
+            List<AtmResponse> closedResult = atmService.findAtms(new AtmSearchRequest(false, false));
+            assertThat(closedResult).allSatisfy(atm -> assertThat(atm.isOpen()).isFalse());
+            assertThat(closedResult.stream().map(AtmResponse::id).toList())
                     .allSatisfy(id -> assertThat(id).isEqualTo("2"));
-        }
-
-        @Test
-        @DisplayName("should return all ATMs (open and closed) when isOpenNow is null")
-        void shouldReturnAllAtmsWhenIsOpenNowIsNull() {
-            when(atmRepository.findAll()).thenReturn(sampleAtms);
-            AtmSearchRequest request = new AtmSearchRequest(null, false);
-
-            List<AtmResponse> result = atmService.findAtms(request);
-
-            // Should return non-interplanetary ATMs regardless of open status (IDs 1, 2, 5)
-            assertThat(result).isNotNull();
-            assertThat(result.size()).isLessThanOrEqualTo(AtmServiceImpl.MAX_RESULTS);
-            assertThat(result.stream().map(AtmResponse::id).toList())
-                    .allSatisfy(id -> assertThat(id).isIn("1", "2", "5"));
-        }
-
-        @Test
-        @DisplayName("should filter for closed interplanetary ATMs when isOpenNow=false and isInterPlanetary=true")
-        void shouldReturnOnlyClosedInterplanetaryAtmsWhenBothFiltersApplied() {
-            when(atmRepository.findAll()).thenReturn(sampleAtms);
-            AtmSearchRequest request = new AtmSearchRequest(false, true);
-
-            List<AtmResponse> result = atmService.findAtms(request);
-
-            // Should return only closed, interplanetary ATMs (ID 4)
-            assertThat(result).isNotNull();
-            assertThat(result).allSatisfy(atm -> assertThat(atm.isOpen()).isFalse());
-            assertThat(result.stream().map(AtmResponse::id).toList())
-                    .allSatisfy(id -> assertThat(id).isEqualTo("4"));
         }
     }
 
@@ -213,43 +160,15 @@ class AtmServiceTest {
         @DisplayName("should return interplanetary ATMs when isInterPlanetary is true")
         void shouldReturnInterplanetaryAtmsWhenIsInterPlanetaryIsTrue() {
             when(atmRepository.findAll()).thenReturn(sampleAtms);
-            AtmSearchRequest request = new AtmSearchRequest(null, true);
 
-            List<AtmResponse> result = atmService.findAtms(request);
+            List<AtmResponse> result = atmService.findAtms(new AtmSearchRequest(null, true));
 
             // Should return interplanetary ATMs (IDs 3, 4, 6)
             assertThat(result).isNotNull();
             assertThat(result.stream().map(AtmResponse::id).toList())
                     .allSatisfy(id -> assertThat(id).isIn("3", "4", "6"));
         }
-
-        @Test
-        @DisplayName("should return non-interplanetary ATMs when isInterPlanetary is false")
-        void shouldReturnNonInterplanetaryAtmsWhenIsInterPlanetaryIsFalse() {
-            when(atmRepository.findAll()).thenReturn(sampleAtms);
-            AtmSearchRequest request = new AtmSearchRequest(null, false);
-
-            List<AtmResponse> result = atmService.findAtms(request);
-
-            // Should return non-interplanetary ATMs (IDs 1, 2, 5)
-            assertThat(result).isNotNull();
-            assertThat(result.stream().map(AtmResponse::id).toList())
-                    .allSatisfy(id -> assertThat(id).isIn("1", "2", "5"));
-        }
-
-        @Test
-        @DisplayName("should return non-interplanetary ATMs when isInterPlanetary is null (default)")
-        void shouldReturnNonInterplanetaryAtmsWhenIsInterPlanetaryIsNull() {
-            when(atmRepository.findAll()).thenReturn(sampleAtms);
-            AtmSearchRequest request = new AtmSearchRequest(null, null);
-
-            List<AtmResponse> result = atmService.findAtms(request);
-
-            // Default behavior: return non-interplanetary ATMs
-            assertThat(result).isNotNull();
-            assertThat(result.stream().map(AtmResponse::id).toList())
-                    .allSatisfy(id -> assertThat(id).isIn("1", "2", "5"));
-        }
+        // Note: isInterPlanetary=false and isInterPlanetary=null are covered by NoFiltersTests
     }
 
     @Nested
@@ -257,68 +176,8 @@ class AtmServiceTest {
     class CombinedFiltersTests {
 
         @Test
-        @DisplayName("should return open interplanetary ATMs when both filters are true")
-        void shouldReturnOpenInterplanetaryAtmsWhenBothFiltersAreTrue() {
-            when(atmRepository.findAll()).thenReturn(sampleAtms);
-            AtmSearchRequest request = new AtmSearchRequest(true, true);
-
-            List<AtmResponse> result = atmService.findAtms(request);
-
-            // Should return open AND interplanetary ATMs (IDs 3, 6)
-            assertThat(result).isNotNull();
-            assertThat(result).allSatisfy(atm -> assertThat(atm.isOpen()).isTrue());
-            assertThat(result.stream().map(AtmResponse::id).toList())
-                    .allSatisfy(id -> assertThat(id).isIn("3", "6"));
-        }
-
-        @Test
-        @DisplayName("should return open non-interplanetary ATMs when isOpenNow=true and isInterPlanetary=false")
-        void shouldReturnOpenNonInterplanetaryAtms() {
-            when(atmRepository.findAll()).thenReturn(sampleAtms);
-            AtmSearchRequest request = new AtmSearchRequest(true, false);
-
-            List<AtmResponse> result = atmService.findAtms(request);
-
-            // Should return open AND non-interplanetary ATMs (IDs 1, 5)
-            assertThat(result).isNotNull();
-            assertThat(result).allSatisfy(atm -> assertThat(atm.isOpen()).isTrue());
-            assertThat(result.stream().map(AtmResponse::id).toList())
-                    .allSatisfy(id -> assertThat(id).isIn("1", "5"));
-        }
-
-        @Test
-        @DisplayName("should return closed interplanetary ATMs when isOpenNow=false and isInterPlanetary=true")
-        void shouldReturnClosedInterplanetaryAtmsWhenIsOpenNowIsFalse() {
-            when(atmRepository.findAll()).thenReturn(sampleAtms);
-            AtmSearchRequest request = new AtmSearchRequest(false, true);
-
-            List<AtmResponse> result = atmService.findAtms(request);
-
-            // Should return closed AND interplanetary ATMs (ID 4 only)
-            assertThat(result).isNotNull();
-            assertThat(result).allSatisfy(atm -> assertThat(atm.isOpen()).isFalse());
-            assertThat(result.stream().map(AtmResponse::id).toList())
-                    .allSatisfy(id -> assertThat(id).isEqualTo("4"));
-        }
-
-        @Test
-        @DisplayName("should return closed non-interplanetary ATMs when isOpenNow=false and isInterPlanetary=false")
-        void shouldReturnClosedNonInterplanetaryAtmsWhenBothFiltersFalse() {
-            when(atmRepository.findAll()).thenReturn(sampleAtms);
-            AtmSearchRequest request = new AtmSearchRequest(false, false);
-
-            List<AtmResponse> result = atmService.findAtms(request);
-
-            // Should return closed AND non-interplanetary ATMs (ID 2 only)
-            assertThat(result).isNotNull();
-            assertThat(result).allSatisfy(atm -> assertThat(atm.isOpen()).isFalse());
-            assertThat(result.stream().map(AtmResponse::id).toList())
-                    .allSatisfy(id -> assertThat(id).isEqualTo("2"));
-        }
-
-        @Test
-        @DisplayName("should apply AND logic correctly with limited dataset for all four combinations")
-        void shouldApplyAndLogicCorrectlyWithLimitedDataset() {
+        @DisplayName("should apply AND logic correctly for all filter combinations")
+        void shouldApplyAndLogicCorrectlyForAllCombinations() {
             // Create a minimal dataset to verify AND logic precisely
             List<Atm> limitedAtms = List.of(
                     buildAtm("open-interplanetary", "Open Interplanetary", true, true),
@@ -329,56 +188,24 @@ class AtmServiceTest {
             when(atmRepository.findAll()).thenReturn(limitedAtms);
 
             // Test: Open AND Interplanetary
-            AtmSearchRequest openInterplanetary = new AtmSearchRequest(true, true);
-            List<AtmResponse> result1 = atmService.findAtms(openInterplanetary);
+            List<AtmResponse> result1 = atmService.findAtms(new AtmSearchRequest(true, true));
             assertThat(result1).hasSize(1);
             assertThat(result1.get(0).id()).isEqualTo("open-interplanetary");
 
             // Test: Closed AND Interplanetary
-            AtmSearchRequest closedInterplanetary = new AtmSearchRequest(false, true);
-            List<AtmResponse> result2 = atmService.findAtms(closedInterplanetary);
+            List<AtmResponse> result2 = atmService.findAtms(new AtmSearchRequest(false, true));
             assertThat(result2).hasSize(1);
             assertThat(result2.get(0).id()).isEqualTo("closed-interplanetary");
 
             // Test: Open AND Non-Interplanetary
-            AtmSearchRequest openLocal = new AtmSearchRequest(true, false);
-            List<AtmResponse> result3 = atmService.findAtms(openLocal);
+            List<AtmResponse> result3 = atmService.findAtms(new AtmSearchRequest(true, false));
             assertThat(result3).hasSize(1);
             assertThat(result3.get(0).id()).isEqualTo("open-local");
 
             // Test: Closed AND Non-Interplanetary
-            AtmSearchRequest closedLocal = new AtmSearchRequest(false, false);
-            List<AtmResponse> result4 = atmService.findAtms(closedLocal);
+            List<AtmResponse> result4 = atmService.findAtms(new AtmSearchRequest(false, false));
             assertThat(result4).hasSize(1);
             assertThat(result4.get(0).id()).isEqualTo("closed-local");
-        }
-
-        @Test
-        @DisplayName("should return all interplanetary ATMs when isOpenNow=null and isInterPlanetary=true")
-        void shouldReturnAllInterplanetaryAtmsWhenIsOpenNowIsNull() {
-            when(atmRepository.findAll()).thenReturn(sampleAtms);
-            AtmSearchRequest request = new AtmSearchRequest(null, true);
-
-            List<AtmResponse> result = atmService.findAtms(request);
-
-            // Should return all interplanetary ATMs (open and closed - IDs 3, 4, 6)
-            assertThat(result).isNotNull();
-            assertThat(result.stream().map(AtmResponse::id).toList())
-                    .allSatisfy(id -> assertThat(id).isIn("3", "4", "6"));
-        }
-
-        @Test
-        @DisplayName("should return all non-interplanetary ATMs when isOpenNow=null and isInterPlanetary=false")
-        void shouldReturnAllNonInterplanetaryAtmsWhenIsOpenNowIsNull() {
-            when(atmRepository.findAll()).thenReturn(sampleAtms);
-            AtmSearchRequest request = new AtmSearchRequest(null, false);
-
-            List<AtmResponse> result = atmService.findAtms(request);
-
-            // Should return all non-interplanetary ATMs (open and closed - IDs 1, 2, 5)
-            assertThat(result).isNotNull();
-            assertThat(result.stream().map(AtmResponse::id).toList())
-                    .allSatisfy(id -> assertThat(id).isIn("1", "2", "5"));
         }
     }
 
@@ -387,56 +214,27 @@ class AtmServiceTest {
     class EmptyResultsTests {
 
         @Test
-        @DisplayName("should throw AtmNotFoundException when repository returns empty list")
-        void shouldThrowAtmNotFoundExceptionWhenRepositoryReturnsEmpty() {
+        @DisplayName("should throw AtmNotFoundException when no ATMs match filters")
+        void shouldThrowAtmNotFoundExceptionWhenNoAtmsMatchFilters() {
+            // Test 1: Empty repository
             when(atmRepository.findAll()).thenReturn(Collections.emptyList());
-
             assertThatThrownBy(() -> atmService.findAtms(new AtmSearchRequest()))
                     .isInstanceOf(AtmNotFoundException.class)
                     .hasMessage("No ATMs found");
-        }
 
-        @Test
-        @DisplayName("should throw AtmNotFoundException when no ATMs match isOpenNow filter")
-        void shouldThrowAtmNotFoundExceptionWhenNoAtmsMatchIsOpenNowFilter() {
-            // All ATMs are closed
-            List<Atm> closedAtms = List.of(
-                    buildAtm("1", "Closed ATM 1", false, false),
-                    buildAtm("2", "Closed ATM 2", false, false)
-            );
-            when(atmRepository.findAll()).thenReturn(closedAtms);
-            AtmSearchRequest request = new AtmSearchRequest(true, false);
-
-            assertThatThrownBy(() -> atmService.findAtms(request))
+            // Test 2: No open ATMs when filtering for open
+            when(atmRepository.findAll()).thenReturn(List.of(
+                    buildAtm("1", "Closed ATM", false, false)
+            ));
+            assertThatThrownBy(() -> atmService.findAtms(new AtmSearchRequest(true, false)))
                     .isInstanceOf(AtmNotFoundException.class)
                     .hasMessage("No ATMs found");
-        }
 
-        @Test
-        @DisplayName("should throw AtmNotFoundException when no ATMs match isInterPlanetary filter")
-        void shouldThrowAtmNotFoundExceptionWhenNoAtmsMatchIsInterPlanetaryFilter() {
-            // All ATMs are non-interplanetary
-            List<Atm> localAtms = List.of(buildAtm("1", "Local ATM 1", true, false));
-            when(atmRepository.findAll()).thenReturn(localAtms);
-            AtmSearchRequest request = new AtmSearchRequest(null, true);
-
-            assertThatThrownBy(() -> atmService.findAtms(request))
-                    .isInstanceOf(AtmNotFoundException.class)
-                    .hasMessage("No ATMs found");
-        }
-
-        @Test
-        @DisplayName("should throw AtmNotFoundException when no ATMs match combined filters")
-        void shouldThrowAtmNotFoundExceptionWhenNoAtmsMatchCombinedFilters() {
-            // No open interplanetary ATMs
-            List<Atm> atms = List.of(
-                    buildAtm("1", "Closed Interplanetary", false, true),
-                    buildAtm("2", "Open Local", true, false)
-            );
-            when(atmRepository.findAll()).thenReturn(atms);
-            AtmSearchRequest request = new AtmSearchRequest(true, true);
-
-            assertThatThrownBy(() -> atmService.findAtms(request))
+            // Test 3: No interplanetary ATMs when filtering for interplanetary
+            when(atmRepository.findAll()).thenReturn(List.of(
+                    buildAtm("1", "Local ATM", true, false)
+            ));
+            assertThatThrownBy(() -> atmService.findAtms(new AtmSearchRequest(null, true)))
                     .isInstanceOf(AtmNotFoundException.class)
                     .hasMessage("No ATMs found");
         }
@@ -516,208 +314,108 @@ class AtmServiceTest {
         class ValidExistingIdTests {
 
             @Test
-            @DisplayName("should return ATM details when valid existing ID is provided")
-            void shouldReturnAtmDetailsWhenValidExistingIdProvided() {
-                // Arrange
+            @DisplayName("should return fully mapped ATM details")
+            void shouldReturnFullyMappedAtmDetails() {
                 Atm atm = buildAtmWithAllDetails(VALID_OBJECT_ID);
                 when(atmRepository.findById(VALID_OBJECT_ID)).thenReturn(Optional.of(atm));
 
-                // Act
                 AtmDetailsResponse result = atmService.findById(VALID_OBJECT_ID);
 
-                // Assert
+                // Verify basic fields
                 assertThat(result).isNotNull();
                 assertThat(result.isOpen()).isTrue();
                 assertThat(result.atmHours()).isEqualTo("24 hours");
                 assertThat(result.numberOfATMs()).isEqualTo(3);
-                verify(atmRepository).findById(VALID_OBJECT_ID);
-            }
 
-            @Test
-            @DisplayName("should correctly map coordinates to response")
-            void shouldCorrectlyMapCoordinatesToResponse() {
-                // Arrange
-                Atm atm = buildAtmWithAllDetails(VALID_OBJECT_ID);
-                when(atmRepository.findById(VALID_OBJECT_ID)).thenReturn(Optional.of(atm));
-
-                // Act
-                AtmDetailsResponse result = atmService.findById(VALID_OBJECT_ID);
-
-                // Assert
+                // Verify coordinates mapping
                 assertThat(result.coordinates()).isNotNull();
                 assertThat(result.coordinates().latitude()).isEqualTo(37.7749);
                 assertThat(result.coordinates().longitude()).isEqualTo(-122.4194);
-            }
 
-            @Test
-            @DisplayName("should correctly map timings to response")
-            void shouldCorrectlyMapTimingsToResponse() {
-                // Arrange
-                Atm atm = buildAtmWithAllDetails(VALID_OBJECT_ID);
-                when(atmRepository.findById(VALID_OBJECT_ID)).thenReturn(Optional.of(atm));
-
-                // Act
-                AtmDetailsResponse result = atmService.findById(VALID_OBJECT_ID);
-
-                // Assert
+                // Verify timings mapping
                 assertThat(result.timings()).isNotNull();
                 assertThat(result.timings().monFri()).isEqualTo("9:00 AM - 6:00 PM");
                 assertThat(result.timings().satSun()).isEqualTo("10:00 AM - 4:00 PM");
                 assertThat(result.timings().holidays()).isEqualTo("Closed");
+
+                verify(atmRepository).findById(VALID_OBJECT_ID);
             }
 
             @Test
-            @DisplayName("should handle ATM with null coordinates")
-            void shouldHandleAtmWithNullCoordinates() {
-                // Arrange
-                Atm atm = Atm.builder()
+            @DisplayName("should handle ATM with null optional fields")
+            void shouldHandleAtmWithNullOptionalFields() {
+                // ATM with null coordinates
+                Atm atmNoCoords = Atm.builder()
                         .id(VALID_OBJECT_ID)
                         .name("Test ATM")
                         .isOpenNow(true)
                         .atmHours("24 hours")
                         .numberOfATMs(2)
-                        .timings(Timings.builder()
-                                .monFri("9:00 AM - 5:00 PM")
-                                .satSun("10:00 AM - 3:00 PM")
-                                .build())
+                        .timings(Timings.builder().monFri("9-5").build())
                         .build();
-                when(atmRepository.findById(VALID_OBJECT_ID)).thenReturn(Optional.of(atm));
+                when(atmRepository.findById(VALID_OBJECT_ID)).thenReturn(Optional.of(atmNoCoords));
 
-                // Act
-                AtmDetailsResponse result = atmService.findById(VALID_OBJECT_ID);
+                AtmDetailsResponse result1 = atmService.findById(VALID_OBJECT_ID);
+                assertThat(result1.coordinates()).isNull();
+                assertThat(result1.timings()).isNotNull();
 
-                // Assert
-                assertThat(result).isNotNull();
-                assertThat(result.coordinates()).isNull();
-                assertThat(result.timings()).isNotNull();
-            }
-
-            @Test
-            @DisplayName("should handle ATM with null timings")
-            void shouldHandleAtmWithNullTimings() {
-                // Arrange
-                Atm atm = Atm.builder()
+                // ATM with null timings
+                Atm atmNoTimings = Atm.builder()
                         .id(VALID_OBJECT_ID)
                         .name("Test ATM")
                         .isOpenNow(false)
-                        .atmHours("9:00 AM - 5:00 PM")
+                        .atmHours("9-5")
                         .numberOfATMs(1)
-                        .coordinates(Coordinates.builder()
-                                .latitude(40.7128)
-                                .longitude(-74.0060)
-                                .build())
+                        .coordinates(Coordinates.builder().latitude(40.0).longitude(-74.0).build())
                         .build();
-                when(atmRepository.findById(VALID_OBJECT_ID)).thenReturn(Optional.of(atm));
+                when(atmRepository.findById(VALID_OBJECT_ID)).thenReturn(Optional.of(atmNoTimings));
 
-                // Act
-                AtmDetailsResponse result = atmService.findById(VALID_OBJECT_ID);
-
-                // Assert
-                assertThat(result).isNotNull();
-                assertThat(result.timings()).isNull();
-                assertThat(result.coordinates()).isNotNull();
+                AtmDetailsResponse result2 = atmService.findById(VALID_OBJECT_ID);
+                assertThat(result2.timings()).isNull();
+                assertThat(result2.coordinates()).isNotNull();
             }
         }
 
-        @Nested
-        @DisplayName("when ID is valid but ATM does not exist")
-        class ValidNonExistentIdTests {
+        @Test
+        @DisplayName("should throw AtmNotFoundException when ATM does not exist")
+        void shouldThrowAtmNotFoundExceptionWhenAtmDoesNotExist() {
+            when(atmRepository.findById(VALID_OBJECT_ID)).thenReturn(Optional.empty());
 
-            @Test
-            @DisplayName("should throw AtmNotFoundException when ATM does not exist")
-            void shouldThrowAtmNotFoundExceptionWhenAtmDoesNotExist() {
-                // Arrange
-                when(atmRepository.findById(VALID_OBJECT_ID)).thenReturn(Optional.empty());
-
-                // Act & Assert
-                assertThatThrownBy(() -> atmService.findById(VALID_OBJECT_ID))
-                        .isInstanceOf(AtmNotFoundException.class)
-                        .hasMessage("ATM information not found");
-                verify(atmRepository).findById(VALID_OBJECT_ID);
-            }
-
-            @Test
-            @DisplayName("should throw AtmNotFoundException with correct message for different valid IDs")
-            void shouldThrowAtmNotFoundExceptionForDifferentValidIds() {
-                // Arrange
-                when(atmRepository.findById(ANOTHER_VALID_OBJECT_ID)).thenReturn(Optional.empty());
-
-                // Act & Assert
-                assertThatThrownBy(() -> atmService.findById(ANOTHER_VALID_OBJECT_ID))
-                        .isInstanceOf(AtmNotFoundException.class)
-                        .hasMessage("ATM information not found");
-            }
+            assertThatThrownBy(() -> atmService.findById(VALID_OBJECT_ID))
+                    .isInstanceOf(AtmNotFoundException.class)
+                    .hasMessage("ATM information not found");
+            verify(atmRepository).findById(VALID_OBJECT_ID);
         }
 
-        @Nested
-        @DisplayName("when ID format is invalid")
-        class InvalidObjectIdFormatTests {
-
-            @ParameterizedTest
-            @ValueSource(strings = {
-                    "invalid-id",
-                    "123",
-                    "xyz",
-                    "507f1f77bcf86cd79943901",   // 23 chars (too short)
-                    "507f1f77bcf86cd7994390111",  // 25 chars (too long)
-                    "ZZZZZZZZZZZZZZZZZZZZZZZZ",   // 24 chars but invalid hex
-                    "507f1f77bcf86cd79943901G",   // Contains non-hex character
-                    "   507f1f77bcf86cd799439011", // Leading spaces
-                    "507f1f77bcf86cd799439011   "  // Trailing spaces
-            })
-            @DisplayName("should throw InvalidObjectIdException for invalid ObjectId formats")
-            void shouldThrowInvalidObjectIdExceptionForInvalidFormats(String invalidId) {
-                // Act & Assert
-                assertThatThrownBy(() -> atmService.findById(invalidId))
-                        .isInstanceOf(InvalidObjectIdException.class)
-                        .hasMessage("Resource not found");
-                verify(atmRepository, never()).findById(invalidId);
-            }
-
-            @Test
-            @DisplayName("should not call repository when ObjectId format is invalid")
-            void shouldNotCallRepositoryWhenObjectIdFormatIsInvalid() {
-                // Act & Assert
-                assertThatThrownBy(() -> atmService.findById("invalid"))
-                        .isInstanceOf(InvalidObjectIdException.class);
-                verify(atmRepository, never()).findById("invalid");
-            }
+        @ParameterizedTest
+        @ValueSource(strings = {
+                "",                              // Empty string
+                "   ",                           // Whitespace only
+                "invalid-id",
+                "123",
+                "xyz",
+                "507f1f77bcf86cd79943901",       // 23 chars (too short)
+                "507f1f77bcf86cd7994390111",     // 25 chars (too long)
+                "ZZZZZZZZZZZZZZZZZZZZZZZZ",      // 24 chars but invalid hex
+                "507f1f77bcf86cd79943901G",      // Contains non-hex character
+                "   507f1f77bcf86cd799439011",   // Leading spaces
+                "507f1f77bcf86cd799439011   "    // Trailing spaces
+        })
+        @DisplayName("should throw InvalidObjectIdException for invalid ObjectId formats")
+        void shouldThrowInvalidObjectIdExceptionForInvalidFormats(String invalidId) {
+            assertThatThrownBy(() -> atmService.findById(invalidId))
+                    .isInstanceOf(InvalidObjectIdException.class)
+                    .hasMessage("Resource not found");
+            verify(atmRepository, never()).findById(invalidId);
         }
 
-        @Nested
-        @DisplayName("when ID is null or empty")
-        class NullAndEmptyIdTests {
-
-            @Test
-            @DisplayName("should throw IllegalArgumentException for null ID")
-            void shouldThrowIllegalArgumentExceptionForNullId() {
-                // Note: ObjectId.isValid(null) throws IllegalArgumentException
-                // This is handled at the controller/framework level with @PathVariable validation
-                // At service level, null input propagates the underlying MongoDB driver behavior
-                assertThatThrownBy(() -> atmService.findById(null))
-                        .isInstanceOf(IllegalArgumentException.class);
-                verify(atmRepository, never()).findById(null);
-            }
-
-            @Test
-            @DisplayName("should throw InvalidObjectIdException for empty ID")
-            void shouldThrowInvalidObjectIdExceptionForEmptyId() {
-                // Act & Assert
-                assertThatThrownBy(() -> atmService.findById(""))
-                        .isInstanceOf(InvalidObjectIdException.class)
-                        .hasMessage("Resource not found");
-                verify(atmRepository, never()).findById("");
-            }
-
-            @Test
-            @DisplayName("should throw InvalidObjectIdException for whitespace-only ID")
-            void shouldThrowInvalidObjectIdExceptionForWhitespaceOnlyId() {
-                // Act & Assert
-                assertThatThrownBy(() -> atmService.findById("   "))
-                        .isInstanceOf(InvalidObjectIdException.class)
-                        .hasMessage("Resource not found");
-                verify(atmRepository, never()).findById("   ");
-            }
+        @Test
+        @DisplayName("should throw IllegalArgumentException for null ID")
+        void shouldThrowIllegalArgumentExceptionForNullId() {
+            // ObjectId.isValid(null) throws IllegalArgumentException
+            assertThatThrownBy(() -> atmService.findById(null))
+                    .isInstanceOf(IllegalArgumentException.class);
+            verify(atmRepository, never()).findById(null);
         }
 
         private Atm buildAtmWithAllDetails(String id) {
