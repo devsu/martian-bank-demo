@@ -1,9 +1,12 @@
 package com.martianbank.atmlocator.service;
 
+import com.martianbank.atmlocator.dto.AtmCreateRequest;
 import com.martianbank.atmlocator.dto.AtmDetailsResponse;
+import com.martianbank.atmlocator.dto.AtmFullResponse;
 import com.martianbank.atmlocator.dto.AtmResponse;
 import com.martianbank.atmlocator.dto.AtmSearchRequest;
 import com.martianbank.atmlocator.exception.AtmNotFoundException;
+import com.martianbank.atmlocator.exception.DuplicateAtmException;
 import com.martianbank.atmlocator.exception.InvalidObjectIdException;
 import com.martianbank.atmlocator.model.Address;
 import com.martianbank.atmlocator.model.Atm;
@@ -28,6 +31,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -441,6 +445,148 @@ class AtmServiceTest {
                     .numberOfATMs(3)
                     .isOpenNow(true)
                     .isInterPlanetary(false)
+                    .build();
+        }
+    }
+
+    @Nested
+    @DisplayName("create scenarios")
+    class CreateTests {
+
+        private static final String GENERATED_ID = "507f1f77bcf86cd799439011";
+
+        @Test
+        @DisplayName("should create ATM successfully when no duplicate exists")
+        void shouldCreateAtmSuccessfullyWhenNoDuplicateExists() {
+            // Arrange
+            AtmCreateRequest request = buildValidCreateRequest();
+            Atm savedAtm = buildSavedAtm(GENERATED_ID, request);
+
+            when(atmRepository.existsByCoordinatesLatitudeAndCoordinatesLongitude(
+                    request.latitude(), request.longitude())).thenReturn(false);
+            when(atmRepository.save(any(Atm.class))).thenReturn(savedAtm);
+
+            // Act
+            AtmFullResponse result = atmService.create(request);
+
+            // Assert
+            assertThat(result).isNotNull();
+            assertThat(result.id()).isEqualTo(GENERATED_ID);
+            assertThat(result.name()).isEqualTo(request.name());
+            assertThat(result.isOpen()).isEqualTo(request.isOpen());
+            assertThat(result.interPlanetary()).isEqualTo(request.interPlanetary());
+            assertThat(result.atmHours()).isEqualTo(request.atmHours());
+            assertThat(result.numberOfATMs()).isEqualTo(request.numberOfATMs());
+
+            verify(atmRepository).existsByCoordinatesLatitudeAndCoordinatesLongitude(
+                    request.latitude(), request.longitude());
+            verify(atmRepository).save(any(Atm.class));
+        }
+
+        @Test
+        @DisplayName("should throw DuplicateAtmException when ATM exists at same coordinates")
+        void shouldThrowDuplicateAtmExceptionWhenDuplicateExists() {
+            // Arrange
+            AtmCreateRequest request = buildValidCreateRequest();
+
+            when(atmRepository.existsByCoordinatesLatitudeAndCoordinatesLongitude(
+                    request.latitude(), request.longitude())).thenReturn(true);
+
+            // Act & Assert
+            assertThatThrownBy(() -> atmService.create(request))
+                    .isInstanceOf(DuplicateAtmException.class)
+                    .hasMessageContaining("An ATM already exists at coordinates");
+
+            verify(atmRepository).existsByCoordinatesLatitudeAndCoordinatesLongitude(
+                    request.latitude(), request.longitude());
+            verify(atmRepository, never()).save(any(Atm.class));
+        }
+
+        @Test
+        @DisplayName("should correctly map all fields from request to response")
+        void shouldCorrectlyMapAllFieldsFromRequestToResponse() {
+            // Arrange
+            AtmCreateRequest request = buildValidCreateRequest();
+            Atm savedAtm = buildSavedAtm(GENERATED_ID, request);
+
+            when(atmRepository.existsByCoordinatesLatitudeAndCoordinatesLongitude(
+                    request.latitude(), request.longitude())).thenReturn(false);
+            when(atmRepository.save(any(Atm.class))).thenReturn(savedAtm);
+
+            // Act
+            AtmFullResponse result = atmService.create(request);
+
+            // Assert - verify all mapped fields
+            assertThat(result.id()).isEqualTo(GENERATED_ID);
+            assertThat(result.name()).isEqualTo(request.name());
+
+            // Address fields
+            assertThat(result.address()).isNotNull();
+            assertThat(result.address().street()).isEqualTo(request.street());
+            assertThat(result.address().city()).isEqualTo(request.city());
+            assertThat(result.address().state()).isEqualTo(request.state());
+            assertThat(result.address().zip()).isEqualTo(request.zip());
+
+            // Coordinates fields
+            assertThat(result.coordinates()).isNotNull();
+            assertThat(result.coordinates().latitude()).isEqualTo(request.latitude());
+            assertThat(result.coordinates().longitude()).isEqualTo(request.longitude());
+
+            // Timings fields
+            assertThat(result.timings()).isNotNull();
+            assertThat(result.timings().monFri()).isEqualTo(request.monFri());
+            assertThat(result.timings().satSun()).isEqualTo(request.satSun());
+            assertThat(result.timings().holidays()).isEqualTo(request.holidays());
+
+            // Other fields
+            assertThat(result.atmHours()).isEqualTo(request.atmHours());
+            assertThat(result.numberOfATMs()).isEqualTo(request.numberOfATMs());
+            assertThat(result.isOpen()).isEqualTo(request.isOpen());
+            assertThat(result.interPlanetary()).isEqualTo(request.interPlanetary());
+        }
+
+        private AtmCreateRequest buildValidCreateRequest() {
+            return new AtmCreateRequest(
+                    "Test ATM",
+                    "123 Main St",
+                    "San Francisco",
+                    "CA",
+                    "94102",
+                    37.7749,
+                    -122.4194,
+                    "9:00 AM - 5:00 PM",
+                    "10:00 AM - 3:00 PM",
+                    "Closed",
+                    "24 hours",
+                    2,
+                    true,
+                    false
+            );
+        }
+
+        private Atm buildSavedAtm(String id, AtmCreateRequest request) {
+            return Atm.builder()
+                    .id(id)
+                    .name(request.name())
+                    .address(Address.builder()
+                            .street(request.street())
+                            .city(request.city())
+                            .state(request.state())
+                            .zip(request.zip())
+                            .build())
+                    .coordinates(Coordinates.builder()
+                            .latitude(request.latitude())
+                            .longitude(request.longitude())
+                            .build())
+                    .timings(Timings.builder()
+                            .monFri(request.monFri())
+                            .satSun(request.satSun())
+                            .holidays(request.holidays())
+                            .build())
+                    .atmHours(request.atmHours())
+                    .numberOfATMs(request.numberOfATMs())
+                    .isOpenNow(request.isOpen())
+                    .isInterPlanetary(request.interPlanetary())
                     .build();
         }
     }

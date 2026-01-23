@@ -9,6 +9,7 @@ import com.martianbank.atmlocator.dto.AtmSearchRequest;
 import com.martianbank.atmlocator.dto.CoordinatesResponse;
 import com.martianbank.atmlocator.dto.TimingsResponse;
 import com.martianbank.atmlocator.exception.AtmNotFoundException;
+import com.martianbank.atmlocator.exception.DuplicateAtmException;
 import com.martianbank.atmlocator.exception.InvalidObjectIdException;
 import com.martianbank.atmlocator.model.Address;
 import com.martianbank.atmlocator.model.Atm;
@@ -194,6 +195,12 @@ public class AtmServiceImpl implements AtmService {
 
     @Override
     public AtmFullResponse create(AtmCreateRequest request) {
+        // Check for duplicate ATM at the same coordinates
+        if (atmRepository.existsByCoordinatesLatitudeAndCoordinatesLongitude(
+                request.latitude(), request.longitude())) {
+            throw new DuplicateAtmException(request.latitude(), request.longitude());
+        }
+
         // Convert request DTO to entity
         Atm atm = mapToAtmEntity(request);
 

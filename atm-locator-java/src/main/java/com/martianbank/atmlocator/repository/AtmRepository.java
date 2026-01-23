@@ -13,6 +13,14 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface AtmRepository extends MongoRepository<Atm, String> {
-    // No custom query methods needed.
-    // Uses inherited findAll() - filtering done in service layer.
+
+    /**
+     * Checks if an ATM already exists at the given coordinates.
+     * Used for duplicate detection when creating new ATMs.
+     *
+     * @param latitude the latitude to check
+     * @param longitude the longitude to check
+     * @return true if an ATM exists at the specified coordinates, false otherwise
+     */
+    boolean existsByCoordinatesLatitudeAndCoordinatesLongitude(Double latitude, Double longitude);
 }

@@ -48,6 +48,16 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles DuplicateAtmException - returns 409 CONFLICT.
+     * Used when attempting to create an ATM that already exists at the same coordinates.
+     */
+    @ExceptionHandler(DuplicateAtmException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateAtmException(DuplicateAtmException ex) {
+        ErrorResponse errorResponse = createErrorResponse(ex);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    /**
      * Handles malformed JSON requests - returns 400 BAD_REQUEST.
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)

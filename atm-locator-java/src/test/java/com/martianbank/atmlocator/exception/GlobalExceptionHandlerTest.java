@@ -309,6 +309,77 @@ class GlobalExceptionHandlerTest {
     }
 
     @Nested
+    @DisplayName("DuplicateAtmException handling")
+    class DuplicateAtmExceptionTests {
+
+        @Test
+        @DisplayName("should return 409 CONFLICT with default message when using default constructor")
+        void shouldReturn409WithDefaultMessage() {
+            // Arrange
+            DuplicateAtmException exception = new DuplicateAtmException();
+
+            // Act
+            ResponseEntity<ErrorResponse> response = handler.handleDuplicateAtmException(exception);
+
+            // Assert
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().message()).isEqualTo("An ATM already exists at this location");
+            assertThat(response.getBody().stack()).isNull();
+        }
+
+        @Test
+        @DisplayName("should return 409 CONFLICT with coordinates message when using coordinates constructor")
+        void shouldReturn409WithCoordinatesMessage() {
+            // Arrange
+            DuplicateAtmException exception = new DuplicateAtmException(37.7749, -122.4194);
+
+            // Act
+            ResponseEntity<ErrorResponse> response = handler.handleDuplicateAtmException(exception);
+
+            // Assert
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().message()).isEqualTo("An ATM already exists at coordinates (37.774900, -122.419400)");
+            assertThat(response.getBody().stack()).isNull();
+        }
+
+        @Test
+        @DisplayName("should return 409 CONFLICT with custom message when using custom message constructor")
+        void shouldReturn409WithCustomMessage() {
+            // Arrange
+            DuplicateAtmException exception = new DuplicateAtmException("Custom duplicate message");
+
+            // Act
+            ResponseEntity<ErrorResponse> response = handler.handleDuplicateAtmException(exception);
+
+            // Assert
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().message()).isEqualTo("Custom duplicate message");
+            assertThat(response.getBody().stack()).isNull();
+        }
+
+        @Test
+        @DisplayName("should include stack trace when stack trace is enabled")
+        void shouldIncludeStackTraceWhenEnabled() {
+            // Arrange
+            ReflectionTestUtils.setField(handler, "includeStackTrace", true);
+            DuplicateAtmException exception = new DuplicateAtmException();
+
+            // Act
+            ResponseEntity<ErrorResponse> response = handler.handleDuplicateAtmException(exception);
+
+            // Assert
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().message()).isEqualTo("An ATM already exists at this location");
+            assertThat(response.getBody().stack()).isNotNull();
+            assertThat(response.getBody().stack()).contains("DuplicateAtmException");
+        }
+    }
+
+    @Nested
     @DisplayName("ErrorResponse format verification")
     class ErrorResponseFormatTests {
 
