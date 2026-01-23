@@ -1,14 +1,18 @@
 package com.martianbank.atmlocator.service;
 
 import com.martianbank.atmlocator.dto.AddressResponse;
+import com.martianbank.atmlocator.dto.AtmCreateRequest;
 import com.martianbank.atmlocator.dto.AtmDetailsResponse;
+import com.martianbank.atmlocator.dto.AtmFullResponse;
 import com.martianbank.atmlocator.dto.AtmResponse;
 import com.martianbank.atmlocator.dto.AtmSearchRequest;
 import com.martianbank.atmlocator.dto.CoordinatesResponse;
 import com.martianbank.atmlocator.dto.TimingsResponse;
 import com.martianbank.atmlocator.exception.AtmNotFoundException;
 import com.martianbank.atmlocator.exception.InvalidObjectIdException;
+import com.martianbank.atmlocator.model.Address;
 import com.martianbank.atmlocator.model.Atm;
+import com.martianbank.atmlocator.model.Coordinates;
 import com.martianbank.atmlocator.repository.AtmRepository;
 import com.martianbank.atmlocator.util.RandomizationUtils;
 import org.bson.types.ObjectId;
@@ -184,6 +188,106 @@ public class AtmServiceImpl implements AtmService {
                 atm.getAtmHours(),
                 atm.getNumberOfATMs(),
                 atm.getIsOpenNow()
+        );
+    }
+
+    @Override
+    public AtmFullResponse create(AtmCreateRequest request) {
+        // Convert request DTO to entity
+        Atm atm = mapToAtmEntity(request);
+
+        // Save to repository
+        Atm savedAtm = atmRepository.save(atm);
+
+        // Map saved entity to full response DTO
+        return mapToAtmFullResponse(savedAtm);
+    }
+
+    /**
+     * Maps an AtmCreateRequest DTO to an Atm entity.
+     *
+     * @param request the ATM creation request
+     * @return the corresponding Atm entity
+     */
+    private Atm mapToAtmEntity(AtmCreateRequest request) {
+        Coordinates coordinates = null;
+        Address address = null;
+
+        if (request.location() != null) {
+            if (request.location().coordinates() != null) {
+                coordinates = Coordinates.builder()
+                        .latitude(request.location().coordinates().latitude())
+                        .longitude(request.location().coordinates().longitude())
+                        .build();
+            }
+
+            if (request.location().address() != null) {
+                address = Address.builder()
+                        .street(request.location().address().street())
+                        .city(request.location().address().city())
+                        .state(request.location().address().state())
+                        .zip(request.location().address().zip())
+                        .build();
+            }
+        }
+
+        return Atm.builder()
+                .name(request.name())
+                .coordinates(coordinates)
+                .address(address)
+                .isOpenNow(request.isOpenNow())
+                .isInterPlanetary(request.isInterPlanetary())
+                .build();
+    }
+
+    /**
+     * Maps an Atm entity to an AtmFullResponse DTO.
+     *
+     * @param atm the ATM entity to convert
+     * @return the corresponding AtmFullResponse DTO
+     */
+    private AtmFullResponse mapToAtmFullResponse(Atm atm) {
+        CoordinatesResponse coordinates = null;
+        AddressResponse address = null;
+        TimingsResponse timings = null;
+
+        if (atm.getCoordinates() != null) {
+            coordinates = new CoordinatesResponse(
+                    atm.getCoordinates().getLatitude(),
+                    atm.getCoordinates().getLongitude()
+            );
+        }
+
+        if (atm.getAddress() != null) {
+            address = new AddressResponse(
+                    atm.getAddress().getStreet(),
+                    atm.getAddress().getCity(),
+                    atm.getAddress().getState(),
+                    atm.getAddress().getZip()
+            );
+        }
+
+        if (atm.getTimings() != null) {
+            timings = new TimingsResponse(
+                    atm.getTimings().getMonFri(),
+                    atm.getTimings().getSatSun(),
+                    atm.getTimings().getHolidays()
+            );
+        }
+
+        return new AtmFullResponse(
+                atm.getId(),
+                atm.getName(),
+                address,
+                coordinates,
+                timings,
+                atm.getAtmHours(),
+                atm.getNumberOfATMs(),
+                atm.getIsOpenNow(),
+                atm.getIsInterPlanetary(),
+                atm.getCreatedAt(),
+                atm.getUpdatedAt(),
+                0  // MongoDB version key, defaulting to 0 for new documents
         );
     }
 }

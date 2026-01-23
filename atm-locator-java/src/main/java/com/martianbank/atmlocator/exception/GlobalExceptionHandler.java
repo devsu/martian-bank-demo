@@ -1,12 +1,18 @@
 package com.martianbank.atmlocator.exception;
 
 import com.martianbank.atmlocator.dto.ErrorResponse;
+import com.martianbank.atmlocator.dto.ValidationErrorResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -48,6 +54,21 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
         ErrorResponse errorResponse = createErrorResponse("Malformed JSON request", ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    /**
+     * Handles validation errors from @Valid annotations - returns 400 BAD_REQUEST.
+     * Extracts field-level errors and returns them in a structured format.
+     * Nested field names use dot notation (e.g., location.coordinates.latitude).
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ValidationErrorResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new LinkedHashMap<>();
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
+        }
+        ValidationErrorResponse response = ValidationErrorResponse.of("Validation failed", errors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     /**

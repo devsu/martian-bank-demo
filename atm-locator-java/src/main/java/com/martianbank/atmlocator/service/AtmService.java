@@ -1,6 +1,8 @@
 package com.martianbank.atmlocator.service;
 
+import com.martianbank.atmlocator.dto.AtmCreateRequest;
 import com.martianbank.atmlocator.dto.AtmDetailsResponse;
+import com.martianbank.atmlocator.dto.AtmFullResponse;
 import com.martianbank.atmlocator.dto.AtmResponse;
 import com.martianbank.atmlocator.dto.AtmSearchRequest;
 
@@ -30,4 +32,12 @@ public interface AtmService {
      * @throws com.martianbank.atmlocator.exception.AtmNotFoundException if no ATM is found with the given ID
      */
     AtmDetailsResponse findById(String id);
+
+    /**
+     * Creates a new ATM entry in the database.
+     *
+     * @param request the ATM creation request containing all required fields
+     * @return the created ATM with all fields including generated ID and timestamps
+     */
+    AtmFullResponse create(AtmCreateRequest request);
 }

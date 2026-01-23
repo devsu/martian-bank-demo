@@ -1,6 +1,8 @@
 package com.martianbank.atmlocator.controller;
 
+import com.martianbank.atmlocator.dto.AtmCreateRequest;
 import com.martianbank.atmlocator.dto.AtmDetailsResponse;
+import com.martianbank.atmlocator.dto.AtmFullResponse;
 import com.martianbank.atmlocator.dto.AtmResponse;
 import com.martianbank.atmlocator.dto.AtmSearchRequest;
 import com.martianbank.atmlocator.dto.ErrorResponse;
@@ -13,6 +15,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -116,5 +120,58 @@ public class AtmController {
             @PathVariable String id) {
         AtmDetailsResponse atm = atmService.findById(id);
         return ResponseEntity.ok(atm);
+    }
+
+    /**
+     * Add a new ATM to the system.
+     * Creates a new ATM entry in the database with the provided details.
+     *
+     * @param request ATM creation request containing all required fields
+     * @return Created ATM with generated ID and timestamps
+     */
+    @Operation(
+            summary = "Add a new ATM",
+            description = "Creates a new ATM entry in the database. All required fields must be provided. " +
+                    "This endpoint is intended for administrative use."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "ATM successfully created",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = AtmFullResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Validation failed",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Server error",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
+    @PostMapping("/add")
+    public ResponseEntity<AtmFullResponse> addAtm(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "ATM creation request",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = AtmCreateRequest.class)
+                    )
+            )
+            @Valid @RequestBody AtmCreateRequest request) {
+        AtmFullResponse createdAtm = atmService.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdAtm);
     }
 }

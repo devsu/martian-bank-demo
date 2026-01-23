@@ -1,6 +1,7 @@
 package com.martianbank.atmlocator.exception;
 
 import com.martianbank.atmlocator.dto.ErrorResponse;
+import com.martianbank.atmlocator.dto.ValidationErrorResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -9,9 +10,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for GlobalExceptionHandler verifying correct HTTP responses.
@@ -138,6 +145,97 @@ class GlobalExceptionHandlerTest {
             assertThat(response.getBody()).isNotNull();
             assertThat(response.getBody().message()).isEqualTo("Malformed JSON request");
             assertThat(response.getBody().stack()).isNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("MethodArgumentNotValidException handling")
+    class MethodArgumentNotValidExceptionTests {
+
+        @Test
+        @DisplayName("should return 400 BAD_REQUEST with 'Validation failed' message and field errors")
+        void shouldReturn400WithValidationFailedAndFieldErrors() {
+            // Arrange
+            MethodArgumentNotValidException exception = mock(MethodArgumentNotValidException.class);
+            BindingResult bindingResult = mock(BindingResult.class);
+            FieldError fieldError = new FieldError("atmCreateRequest", "name", "Name is required");
+
+            when(exception.getBindingResult()).thenReturn(bindingResult);
+            when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
+
+            // Act
+            ResponseEntity<ValidationErrorResponse> response = handler.handleMethodArgumentNotValid(exception);
+
+            // Assert
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().message()).isEqualTo("Validation failed");
+            assertThat(response.getBody().errors()).containsEntry("name", "Name is required");
+        }
+
+        @Test
+        @DisplayName("should return 400 BAD_REQUEST with multiple field errors")
+        void shouldReturn400WithMultipleFieldErrors() {
+            // Arrange
+            MethodArgumentNotValidException exception = mock(MethodArgumentNotValidException.class);
+            BindingResult bindingResult = mock(BindingResult.class);
+            FieldError nameError = new FieldError("atmCreateRequest", "name", "Name is required");
+            FieldError latitudeError = new FieldError("atmCreateRequest", "location.coordinates.latitude", "Latitude must be between -90 and 90");
+
+            when(exception.getBindingResult()).thenReturn(bindingResult);
+            when(bindingResult.getFieldErrors()).thenReturn(List.of(nameError, latitudeError));
+
+            // Act
+            ResponseEntity<ValidationErrorResponse> response = handler.handleMethodArgumentNotValid(exception);
+
+            // Assert
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().message()).isEqualTo("Validation failed");
+            assertThat(response.getBody().errors()).hasSize(2);
+            assertThat(response.getBody().errors()).containsEntry("name", "Name is required");
+            assertThat(response.getBody().errors()).containsEntry("location.coordinates.latitude", "Latitude must be between -90 and 90");
+        }
+
+        @Test
+        @DisplayName("should return 400 BAD_REQUEST with nested field errors using dot notation")
+        void shouldReturn400WithNestedFieldErrorsUsingDotNotation() {
+            // Arrange
+            MethodArgumentNotValidException exception = mock(MethodArgumentNotValidException.class);
+            BindingResult bindingResult = mock(BindingResult.class);
+            FieldError nestedError = new FieldError("atmCreateRequest", "location.address.city", "City is required");
+
+            when(exception.getBindingResult()).thenReturn(bindingResult);
+            when(bindingResult.getFieldErrors()).thenReturn(List.of(nestedError));
+
+            // Act
+            ResponseEntity<ValidationErrorResponse> response = handler.handleMethodArgumentNotValid(exception);
+
+            // Assert
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().message()).isEqualTo("Validation failed");
+            assertThat(response.getBody().errors()).containsEntry("location.address.city", "City is required");
+        }
+
+        @Test
+        @DisplayName("should return 400 BAD_REQUEST with empty errors map when no field errors")
+        void shouldReturn400WithEmptyErrorsMapWhenNoFieldErrors() {
+            // Arrange
+            MethodArgumentNotValidException exception = mock(MethodArgumentNotValidException.class);
+            BindingResult bindingResult = mock(BindingResult.class);
+
+            when(exception.getBindingResult()).thenReturn(bindingResult);
+            when(bindingResult.getFieldErrors()).thenReturn(List.of());
+
+            // Act
+            ResponseEntity<ValidationErrorResponse> response = handler.handleMethodArgumentNotValid(exception);
+
+            // Assert
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().message()).isEqualTo("Validation failed");
+            assertThat(response.getBody().errors()).isEmpty();
         }
     }
 
