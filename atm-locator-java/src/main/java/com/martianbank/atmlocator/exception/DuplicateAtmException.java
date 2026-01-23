@@ -34,4 +34,14 @@ public class DuplicateAtmException extends RuntimeException {
     public DuplicateAtmException(Double latitude, Double longitude) {
         super(String.format("An ATM already exists at coordinates (%.6f, %.6f)", latitude, longitude));
     }
+
+    /**
+     * Factory method to create a DuplicateAtmException for a duplicate name.
+     *
+     * @param name the duplicate ATM name
+     * @return a new DuplicateAtmException instance
+     */
+    public static DuplicateAtmException forName(String name) {
+        return new DuplicateAtmException(String.format("An ATM with name '%s' already exists", name));
+    }
 }

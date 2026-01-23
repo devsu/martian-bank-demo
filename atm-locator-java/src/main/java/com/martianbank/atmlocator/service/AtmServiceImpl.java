@@ -195,6 +195,11 @@ public class AtmServiceImpl implements AtmService {
 
     @Override
     public AtmFullResponse create(AtmCreateRequest request) {
+        // Check for duplicate ATM with the same name
+        if (atmRepository.existsByName(request.name())) {
+            throw DuplicateAtmException.forName(request.name());
+        }
+
         // Check for duplicate ATM at the same coordinates
         if (atmRepository.existsByCoordinatesLatitudeAndCoordinatesLongitude(
                 request.latitude(), request.longitude())) {

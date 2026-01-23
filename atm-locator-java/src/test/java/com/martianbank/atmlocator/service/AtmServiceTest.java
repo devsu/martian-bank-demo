@@ -462,6 +462,7 @@ class AtmServiceTest {
             AtmCreateRequest request = buildValidCreateRequest();
             Atm savedAtm = buildSavedAtm(GENERATED_ID, request);
 
+            when(atmRepository.existsByName(request.name())).thenReturn(false);
             when(atmRepository.existsByCoordinatesLatitudeAndCoordinatesLongitude(
                     request.latitude(), request.longitude())).thenReturn(false);
             when(atmRepository.save(any(Atm.class))).thenReturn(savedAtm);
@@ -478,6 +479,7 @@ class AtmServiceTest {
             assertThat(result.atmHours()).isEqualTo(request.atmHours());
             assertThat(result.numberOfATMs()).isEqualTo(request.numberOfATMs());
 
+            verify(atmRepository).existsByName(request.name());
             verify(atmRepository).existsByCoordinatesLatitudeAndCoordinatesLongitude(
                     request.latitude(), request.longitude());
             verify(atmRepository).save(any(Atm.class));
@@ -485,10 +487,11 @@ class AtmServiceTest {
 
         @Test
         @DisplayName("should throw DuplicateAtmException when ATM exists at same coordinates")
-        void shouldThrowDuplicateAtmExceptionWhenDuplicateExists() {
+        void shouldThrowDuplicateAtmExceptionWhenDuplicateCoordinatesExist() {
             // Arrange
             AtmCreateRequest request = buildValidCreateRequest();
 
+            when(atmRepository.existsByName(request.name())).thenReturn(false);
             when(atmRepository.existsByCoordinatesLatitudeAndCoordinatesLongitude(
                     request.latitude(), request.longitude())).thenReturn(true);
 
@@ -497,7 +500,27 @@ class AtmServiceTest {
                     .isInstanceOf(DuplicateAtmException.class)
                     .hasMessageContaining("An ATM already exists at coordinates");
 
+            verify(atmRepository).existsByName(request.name());
             verify(atmRepository).existsByCoordinatesLatitudeAndCoordinatesLongitude(
+                    request.latitude(), request.longitude());
+            verify(atmRepository, never()).save(any(Atm.class));
+        }
+
+        @Test
+        @DisplayName("should throw DuplicateAtmException when ATM with same name already exists")
+        void shouldThrowDuplicateAtmExceptionWhenDuplicateNameExists() {
+            // Arrange
+            AtmCreateRequest request = buildValidCreateRequest();
+
+            when(atmRepository.existsByName(request.name())).thenReturn(true);
+
+            // Act & Assert
+            assertThatThrownBy(() -> atmService.create(request))
+                    .isInstanceOf(DuplicateAtmException.class)
+                    .hasMessageContaining("An ATM with name '" + request.name() + "' already exists");
+
+            verify(atmRepository).existsByName(request.name());
+            verify(atmRepository, never()).existsByCoordinatesLatitudeAndCoordinatesLongitude(
                     request.latitude(), request.longitude());
             verify(atmRepository, never()).save(any(Atm.class));
         }
@@ -509,6 +532,7 @@ class AtmServiceTest {
             AtmCreateRequest request = buildValidCreateRequest();
             Atm savedAtm = buildSavedAtm(GENERATED_ID, request);
 
+            when(atmRepository.existsByName(request.name())).thenReturn(false);
             when(atmRepository.existsByCoordinatesLatitudeAndCoordinatesLongitude(
                     request.latitude(), request.longitude())).thenReturn(false);
             when(atmRepository.save(any(Atm.class))).thenReturn(savedAtm);

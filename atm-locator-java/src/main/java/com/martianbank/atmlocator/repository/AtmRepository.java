@@ -23,4 +23,13 @@ public interface AtmRepository extends MongoRepository<Atm, String> {
      * @return true if an ATM exists at the specified coordinates, false otherwise
      */
     boolean existsByCoordinatesLatitudeAndCoordinatesLongitude(Double latitude, Double longitude);
+
+    /**
+     * Checks if an ATM already exists with the given name.
+     * Used for duplicate detection when creating new ATMs.
+     *
+     * @param name the name to check
+     * @return true if an ATM exists with the specified name, false otherwise
+     */
+    boolean existsByName(String name);
 }
