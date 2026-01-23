@@ -25,7 +25,7 @@ COPY src src
 RUN ./gradlew build --no-daemon -x test
 
 # Runtime Stage
-FROM eclipse-temurin:25-jre-alpine
+FROM eclipse-temurin:25-jdk-alpine
 
 WORKDIR /app
 
@@ -33,8 +33,16 @@ WORKDIR /app
 RUN addgroup -g 1001 -S appgroup && \
     adduser -u 1001 -S appuser -G appgroup
 
-# Install curl for healthcheck
-RUN apk add --no-cache curl
+# Install curl for healthcheck and bash for gradlew
+RUN apk add --no-cache curl bash
+
+# Copy gradle wrapper and build files for running tests
+COPY --from=build /app/gradlew /app/gradlew
+COPY --from=build /app/gradle /app/gradle
+COPY --from=build /app/build.gradle /app/build.gradle
+COPY --from=build /app/settings.gradle /app/settings.gradle
+COPY --from=build /app/src /app/src
+COPY --from=build /app/.gradle /app/.gradle
 
 # Copy built JAR from build stage
 COPY --from=build /app/build/libs/*.jar app.jar

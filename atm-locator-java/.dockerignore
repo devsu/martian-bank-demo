@@ -30,12 +30,6 @@ docs/
 LICENSE
 README*
 
-# Test and development files
-src/test/
-**/test/
-**/*Test.java
-**/*Tests.java
-
 # Misc
 .env*
 .DS_Store
