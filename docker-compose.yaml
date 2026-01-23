@@ -88,6 +88,8 @@ services:
     environment:
       DB_URL: mongodb://root:example@mongo:27017/test?authSource=admin
       PORT: 8081
+    volumes:
+      - ./atm-locator-java/src:/app/src
     depends_on:
       - mongo
     restart: always
