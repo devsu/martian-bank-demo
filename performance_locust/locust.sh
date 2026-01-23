@@ -20,7 +20,10 @@ pip install -r requirements.txt
 locust -f auth_locust.py --headless -u 1 -r 1 --run-time 10s 
 sleep 2
 
-locust -f atm_locust.py --headless -u 1 -r 1 --run-time 6s 
+locust -f atm_locust.py --headless -u 1 -r 1 --run-time 6s
+sleep 2
+
+locust -f atm_locust_java.py --headless -u 1 -r 1 --run-time 6s
 sleep 2
 
 locust -f account_locust.py --headless -u 1 -r 1 --run-time 6s  
