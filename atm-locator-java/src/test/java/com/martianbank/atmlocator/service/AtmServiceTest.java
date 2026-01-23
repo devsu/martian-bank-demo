@@ -174,7 +174,7 @@ class AtmServiceTest {
 
             // By default, should filter to non-interplanetary ATMs
             assertThat(result).isNotNull();
-            assertThat(result.size()).isLessThanOrEqualTo(4);
+            assertThat(result.size()).isLessThanOrEqualTo(AtmServiceImpl.MAX_RESULTS);
             // All returned ATMs should be non-interplanetary (IDs 1, 2, 5)
             assertThat(result.stream().map(AtmResponse::id).toList())
                     .allSatisfy(id -> assertThat(id).isIn("1", "2", "5"));
@@ -189,14 +189,14 @@ class AtmServiceTest {
             List<AtmResponse> result = atmService.findAtms(request);
 
             assertThat(result).isNotNull();
-            assertThat(result.size()).isLessThanOrEqualTo(4);
+            assertThat(result.size()).isLessThanOrEqualTo(AtmServiceImpl.MAX_RESULTS);
             // All returned ATMs should be non-interplanetary
             assertThat(result.stream().map(AtmResponse::id).toList())
                     .allSatisfy(id -> assertThat(id).isIn("1", "2", "5"));
         }
 
         @Test
-        @DisplayName("should return up to 4 ATMs maximum")
+        @DisplayName("should return up to MAX_RESULTS ATMs maximum")
         void shouldReturnUpToFourAtmsMaximum() {
             // Add more non-interplanetary ATMs to test max limit
             List<Atm> manyAtms = new ArrayList<>(sampleAtms);
@@ -212,7 +212,7 @@ class AtmServiceTest {
 
             List<AtmResponse> result = atmService.findAtms(new AtmSearchRequest());
 
-            assertThat(result).hasSize(4);
+            assertThat(result).hasSize(AtmServiceImpl.MAX_RESULTS);
         }
     }
 
@@ -245,7 +245,7 @@ class AtmServiceTest {
 
             // Should return non-interplanetary ATMs regardless of open status
             assertThat(result).isNotNull();
-            assertThat(result.size()).isLessThanOrEqualTo(4);
+            assertThat(result.size()).isLessThanOrEqualTo(AtmServiceImpl.MAX_RESULTS);
             assertThat(result.stream().map(AtmResponse::id).toList())
                     .allSatisfy(id -> assertThat(id).isIn("1", "2", "5"));
         }
@@ -260,7 +260,7 @@ class AtmServiceTest {
 
             // Should return non-interplanetary ATMs regardless of open status
             assertThat(result).isNotNull();
-            assertThat(result.size()).isLessThanOrEqualTo(4);
+            assertThat(result.size()).isLessThanOrEqualTo(AtmServiceImpl.MAX_RESULTS);
         }
     }
 

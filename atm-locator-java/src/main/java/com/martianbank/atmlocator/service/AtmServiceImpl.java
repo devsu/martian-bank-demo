@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Service
 public class AtmServiceImpl implements AtmService {
 
-    private static final int MAX_RESULTS = 4;
+    static final int MAX_RESULTS = 4;
 
     private final AtmRepository atmRepository;
 
