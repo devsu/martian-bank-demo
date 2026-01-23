@@ -13,6 +13,7 @@ import com.martianbank.atmlocator.exception.InvalidObjectIdException;
 import com.martianbank.atmlocator.model.Address;
 import com.martianbank.atmlocator.model.Atm;
 import com.martianbank.atmlocator.model.Coordinates;
+import com.martianbank.atmlocator.model.Timings;
 import com.martianbank.atmlocator.repository.AtmRepository;
 import com.martianbank.atmlocator.util.RandomizationUtils;
 import org.bson.types.ObjectId;
@@ -210,33 +211,33 @@ public class AtmServiceImpl implements AtmService {
      * @return the corresponding Atm entity
      */
     private Atm mapToAtmEntity(AtmCreateRequest request) {
-        Coordinates coordinates = null;
-        Address address = null;
+        Coordinates coordinates = Coordinates.builder()
+                .latitude(request.latitude())
+                .longitude(request.longitude())
+                .build();
 
-        if (request.location() != null) {
-            if (request.location().coordinates() != null) {
-                coordinates = Coordinates.builder()
-                        .latitude(request.location().coordinates().latitude())
-                        .longitude(request.location().coordinates().longitude())
-                        .build();
-            }
+        Address address = Address.builder()
+                .street(request.street())
+                .city(request.city())
+                .state(request.state())
+                .zip(request.zip())
+                .build();
 
-            if (request.location().address() != null) {
-                address = Address.builder()
-                        .street(request.location().address().street())
-                        .city(request.location().address().city())
-                        .state(request.location().address().state())
-                        .zip(request.location().address().zip())
-                        .build();
-            }
-        }
+        Timings timings = Timings.builder()
+                .monFri(request.monFri())
+                .satSun(request.satSun())
+                .holidays(request.holidays())
+                .build();
 
         return Atm.builder()
                 .name(request.name())
                 .coordinates(coordinates)
                 .address(address)
-                .isOpenNow(request.isOpenNow())
-                .isInterPlanetary(request.isInterPlanetary())
+                .timings(timings)
+                .atmHours(request.atmHours())
+                .numberOfATMs(request.numberOfATMs())
+                .isOpenNow(request.isOpen())
+                .isInterPlanetary(request.interPlanetary())
                 .build();
     }
 

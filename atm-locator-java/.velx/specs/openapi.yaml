@@ -282,16 +282,12 @@ components:
         latitude:
           type: number
           format: double
-          description: Geographic latitude coordinate
-          minimum: -90
-          maximum: 90
+          description: Geographic latitude coordinate (supports interplanetary coordinates)
           example: 37.7749
         longitude:
           type: number
           format: double
-          description: Geographic longitude coordinate
-          minimum: -180
-          maximum: 180
+          description: Geographic longitude coordinate (supports interplanetary coordinates)
           example: -122.4194
         monFri:
           type: string
@@ -445,7 +441,7 @@ components:
 
     Coordinates:
       type: object
-      description: Geographic coordinates of the ATM
+      description: Geographic coordinates of the ATM (supports interplanetary coordinates)
       required:
         - latitude
         - longitude
@@ -453,16 +449,12 @@ components:
         latitude:
           type: number
           format: double
-          description: Geographic latitude
-          minimum: -90
-          maximum: 90
+          description: Geographic latitude (supports interplanetary coordinates)
           example: 37.7749
         longitude:
           type: number
           format: double
-          description: Geographic longitude
-          minimum: -180
-          maximum: 180
+          description: Geographic longitude (supports interplanetary coordinates)
           example: -122.4194
 
     Timings:
