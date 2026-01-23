@@ -160,14 +160,29 @@ class AtmServiceTest {
         }
 
         @Test
-        @DisplayName("should return all ATMs (open and closed) when isOpenNow is false")
-        void shouldReturnAllAtmsWhenIsOpenNowIsFalse() {
+        @DisplayName("should return only closed ATMs when isOpenNow is false")
+        void shouldReturnOnlyClosedAtmsWhenIsOpenNowIsFalse() {
             when(atmRepository.findAll()).thenReturn(sampleAtms);
             AtmSearchRequest request = new AtmSearchRequest(false, false);
 
             List<AtmResponse> result = atmService.findAtms(request);
 
-            // Should return non-interplanetary ATMs regardless of open status
+            // Should return only closed, non-interplanetary ATMs (ID 2)
+            assertThat(result).isNotNull();
+            assertThat(result).allSatisfy(atm -> assertThat(atm.isOpen()).isFalse());
+            assertThat(result.stream().map(AtmResponse::id).toList())
+                    .allSatisfy(id -> assertThat(id).isEqualTo("2"));
+        }
+
+        @Test
+        @DisplayName("should return all ATMs (open and closed) when isOpenNow is null")
+        void shouldReturnAllAtmsWhenIsOpenNowIsNull() {
+            when(atmRepository.findAll()).thenReturn(sampleAtms);
+            AtmSearchRequest request = new AtmSearchRequest(null, false);
+
+            List<AtmResponse> result = atmService.findAtms(request);
+
+            // Should return non-interplanetary ATMs regardless of open status (IDs 1, 2, 5)
             assertThat(result).isNotNull();
             assertThat(result.size()).isLessThanOrEqualTo(AtmServiceImpl.MAX_RESULTS);
             assertThat(result.stream().map(AtmResponse::id).toList())
@@ -175,16 +190,18 @@ class AtmServiceTest {
         }
 
         @Test
-        @DisplayName("should return all ATMs when isOpenNow is null")
-        void shouldReturnAllAtmsWhenIsOpenNowIsNull() {
+        @DisplayName("should filter for closed interplanetary ATMs when isOpenNow=false and isInterPlanetary=true")
+        void shouldReturnOnlyClosedInterplanetaryAtmsWhenBothFiltersApplied() {
             when(atmRepository.findAll()).thenReturn(sampleAtms);
-            AtmSearchRequest request = new AtmSearchRequest(null, false);
+            AtmSearchRequest request = new AtmSearchRequest(false, true);
 
             List<AtmResponse> result = atmService.findAtms(request);
 
-            // Should return non-interplanetary ATMs regardless of open status
+            // Should return only closed, interplanetary ATMs (ID 4)
             assertThat(result).isNotNull();
-            assertThat(result.size()).isLessThanOrEqualTo(AtmServiceImpl.MAX_RESULTS);
+            assertThat(result).allSatisfy(atm -> assertThat(atm.isOpen()).isFalse());
+            assertThat(result.stream().map(AtmResponse::id).toList())
+                    .allSatisfy(id -> assertThat(id).isEqualTo("4"));
         }
     }
 
@@ -270,21 +287,37 @@ class AtmServiceTest {
         }
 
         @Test
-        @DisplayName("should return all interplanetary ATMs when isOpenNow=false and isInterPlanetary=true")
-        void shouldReturnAllInterplanetaryAtmsWhenIsOpenNowIsFalse() {
+        @DisplayName("should return closed interplanetary ATMs when isOpenNow=false and isInterPlanetary=true")
+        void shouldReturnClosedInterplanetaryAtmsWhenIsOpenNowIsFalse() {
             when(atmRepository.findAll()).thenReturn(sampleAtms);
             AtmSearchRequest request = new AtmSearchRequest(false, true);
 
             List<AtmResponse> result = atmService.findAtms(request);
 
-            // Should return all interplanetary ATMs (open and closed - IDs 3, 4, 6)
+            // Should return closed AND interplanetary ATMs (ID 4 only)
             assertThat(result).isNotNull();
+            assertThat(result).allSatisfy(atm -> assertThat(atm.isOpen()).isFalse());
             assertThat(result.stream().map(AtmResponse::id).toList())
-                    .allSatisfy(id -> assertThat(id).isIn("3", "4", "6"));
+                    .allSatisfy(id -> assertThat(id).isEqualTo("4"));
         }
 
         @Test
-        @DisplayName("should apply AND logic correctly with limited dataset")
+        @DisplayName("should return closed non-interplanetary ATMs when isOpenNow=false and isInterPlanetary=false")
+        void shouldReturnClosedNonInterplanetaryAtmsWhenBothFiltersFalse() {
+            when(atmRepository.findAll()).thenReturn(sampleAtms);
+            AtmSearchRequest request = new AtmSearchRequest(false, false);
+
+            List<AtmResponse> result = atmService.findAtms(request);
+
+            // Should return closed AND non-interplanetary ATMs (ID 2 only)
+            assertThat(result).isNotNull();
+            assertThat(result).allSatisfy(atm -> assertThat(atm.isOpen()).isFalse());
+            assertThat(result.stream().map(AtmResponse::id).toList())
+                    .allSatisfy(id -> assertThat(id).isEqualTo("2"));
+        }
+
+        @Test
+        @DisplayName("should apply AND logic correctly with limited dataset for all four combinations")
         void shouldApplyAndLogicCorrectlyWithLimitedDataset() {
             // Create a minimal dataset to verify AND logic precisely
             List<Atm> limitedAtms = List.of(
@@ -297,10 +330,55 @@ class AtmServiceTest {
 
             // Test: Open AND Interplanetary
             AtmSearchRequest openInterplanetary = new AtmSearchRequest(true, true);
-            List<AtmResponse> result = atmService.findAtms(openInterplanetary);
+            List<AtmResponse> result1 = atmService.findAtms(openInterplanetary);
+            assertThat(result1).hasSize(1);
+            assertThat(result1.get(0).id()).isEqualTo("open-interplanetary");
 
-            assertThat(result).hasSize(1);
-            assertThat(result.get(0).id()).isEqualTo("open-interplanetary");
+            // Test: Closed AND Interplanetary
+            AtmSearchRequest closedInterplanetary = new AtmSearchRequest(false, true);
+            List<AtmResponse> result2 = atmService.findAtms(closedInterplanetary);
+            assertThat(result2).hasSize(1);
+            assertThat(result2.get(0).id()).isEqualTo("closed-interplanetary");
+
+            // Test: Open AND Non-Interplanetary
+            AtmSearchRequest openLocal = new AtmSearchRequest(true, false);
+            List<AtmResponse> result3 = atmService.findAtms(openLocal);
+            assertThat(result3).hasSize(1);
+            assertThat(result3.get(0).id()).isEqualTo("open-local");
+
+            // Test: Closed AND Non-Interplanetary
+            AtmSearchRequest closedLocal = new AtmSearchRequest(false, false);
+            List<AtmResponse> result4 = atmService.findAtms(closedLocal);
+            assertThat(result4).hasSize(1);
+            assertThat(result4.get(0).id()).isEqualTo("closed-local");
+        }
+
+        @Test
+        @DisplayName("should return all interplanetary ATMs when isOpenNow=null and isInterPlanetary=true")
+        void shouldReturnAllInterplanetaryAtmsWhenIsOpenNowIsNull() {
+            when(atmRepository.findAll()).thenReturn(sampleAtms);
+            AtmSearchRequest request = new AtmSearchRequest(null, true);
+
+            List<AtmResponse> result = atmService.findAtms(request);
+
+            // Should return all interplanetary ATMs (open and closed - IDs 3, 4, 6)
+            assertThat(result).isNotNull();
+            assertThat(result.stream().map(AtmResponse::id).toList())
+                    .allSatisfy(id -> assertThat(id).isIn("3", "4", "6"));
+        }
+
+        @Test
+        @DisplayName("should return all non-interplanetary ATMs when isOpenNow=null and isInterPlanetary=false")
+        void shouldReturnAllNonInterplanetaryAtmsWhenIsOpenNowIsNull() {
+            when(atmRepository.findAll()).thenReturn(sampleAtms);
+            AtmSearchRequest request = new AtmSearchRequest(null, false);
+
+            List<AtmResponse> result = atmService.findAtms(request);
+
+            // Should return all non-interplanetary ATMs (open and closed - IDs 1, 2, 5)
+            assertThat(result).isNotNull();
+            assertThat(result.stream().map(AtmResponse::id).toList())
+                    .allSatisfy(id -> assertThat(id).isIn("1", "2", "5"));
         }
     }
 

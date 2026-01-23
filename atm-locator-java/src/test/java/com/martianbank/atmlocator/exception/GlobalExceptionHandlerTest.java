@@ -3,6 +3,7 @@ package com.martianbank.atmlocator.exception;
 import com.martianbank.atmlocator.dto.ErrorResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,98 +26,225 @@ class GlobalExceptionHandlerTest {
         ReflectionTestUtils.setField(handler, "includeStackTrace", false);
     }
 
-    @Test
-    @DisplayName("handleAtmNotFoundException should return 404 with ErrorResponse")
-    void handleAtmNotFoundException_ShouldReturn404WithErrorResponse() {
-        AtmNotFoundException exception = new AtmNotFoundException();
+    @Nested
+    @DisplayName("AtmNotFoundException handling")
+    class AtmNotFoundExceptionTests {
 
-        ResponseEntity<ErrorResponse> response = handler.handleAtmNotFoundException(exception);
+        @Test
+        @DisplayName("should return 404 NOT_FOUND with default message when no ATMs found")
+        void shouldReturn404WithDefaultMessageWhenNoAtmsFound() {
+            // Arrange
+            AtmNotFoundException exception = new AtmNotFoundException();
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().message()).isEqualTo("No ATMs found");
-        assertThat(response.getBody().stack()).isNull();
+            // Act
+            ResponseEntity<ErrorResponse> response = handler.handleAtmNotFoundException(exception);
+
+            // Assert
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().message()).isEqualTo("No ATMs found");
+            assertThat(response.getBody().stack()).isNull();
+        }
+
+        @Test
+        @DisplayName("should return 404 NOT_FOUND with specific message when ATM ID not found")
+        void shouldReturn404WithSpecificMessageWhenAtmIdNotFound() {
+            // Arrange
+            AtmNotFoundException exception = new AtmNotFoundException("abc123");
+
+            // Act
+            ResponseEntity<ErrorResponse> response = handler.handleAtmNotFoundException(exception);
+
+            // Assert
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().message()).isEqualTo("ATM information not found");
+            assertThat(response.getBody().stack()).isNull();
+        }
+
+        @Test
+        @DisplayName("should include stack trace when stack trace is enabled")
+        void shouldIncludeStackTraceWhenEnabled() {
+            // Arrange
+            ReflectionTestUtils.setField(handler, "includeStackTrace", true);
+            AtmNotFoundException exception = new AtmNotFoundException();
+
+            // Act
+            ResponseEntity<ErrorResponse> response = handler.handleAtmNotFoundException(exception);
+
+            // Assert
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().message()).isEqualTo("No ATMs found");
+            assertThat(response.getBody().stack()).isNotNull();
+            assertThat(response.getBody().stack()).contains("AtmNotFoundException");
+        }
     }
 
-    @Test
-    @DisplayName("handleAtmNotFoundException with ID should return 404 with specific message")
-    void handleAtmNotFoundException_WithId_ShouldReturn404WithSpecificMessage() {
-        AtmNotFoundException exception = new AtmNotFoundException("abc123");
+    @Nested
+    @DisplayName("InvalidObjectIdException handling")
+    class InvalidObjectIdExceptionTests {
 
-        ResponseEntity<ErrorResponse> response = handler.handleAtmNotFoundException(exception);
+        @Test
+        @DisplayName("should return 404 NOT_FOUND with 'Resource not found' message")
+        void shouldReturn404WithResourceNotFoundMessage() {
+            // Arrange
+            InvalidObjectIdException exception = new InvalidObjectIdException("invalid-id");
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().message()).isEqualTo("ATM information not found");
-        assertThat(response.getBody().stack()).isNull();
+            // Act
+            ResponseEntity<ErrorResponse> response = handler.handleInvalidObjectIdException(exception);
+
+            // Assert
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().message()).isEqualTo("Resource not found");
+            assertThat(response.getBody().stack()).isNull();
+        }
+
+        @Test
+        @DisplayName("should include stack trace when stack trace is enabled")
+        void shouldIncludeStackTraceWhenEnabled() {
+            // Arrange
+            ReflectionTestUtils.setField(handler, "includeStackTrace", true);
+            InvalidObjectIdException exception = new InvalidObjectIdException("invalid-id");
+
+            // Act
+            ResponseEntity<ErrorResponse> response = handler.handleInvalidObjectIdException(exception);
+
+            // Assert
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().message()).isEqualTo("Resource not found");
+            assertThat(response.getBody().stack()).isNotNull();
+            assertThat(response.getBody().stack()).contains("InvalidObjectIdException");
+        }
     }
 
-    @Test
-    @DisplayName("handleInvalidObjectIdException should return 404 with ErrorResponse")
-    void handleInvalidObjectIdException_ShouldReturn404WithErrorResponse() {
-        InvalidObjectIdException exception = new InvalidObjectIdException("invalid-id");
+    @Nested
+    @DisplayName("HttpMessageNotReadableException handling")
+    class HttpMessageNotReadableExceptionTests {
 
-        ResponseEntity<ErrorResponse> response = handler.handleInvalidObjectIdException(exception);
+        @Test
+        @DisplayName("should return 400 BAD_REQUEST with 'Malformed JSON request' message")
+        void shouldReturn400WithMalformedJsonMessage() {
+            // Arrange
+            HttpMessageNotReadableException exception = mock(HttpMessageNotReadableException.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().message()).isEqualTo("Resource not found");
-        assertThat(response.getBody().stack()).isNull();
+            // Act
+            ResponseEntity<ErrorResponse> response = handler.handleHttpMessageNotReadable(exception);
+
+            // Assert
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().message()).isEqualTo("Malformed JSON request");
+            assertThat(response.getBody().stack()).isNull();
+        }
     }
 
-    @Test
-    @DisplayName("handleHttpMessageNotReadable should return 400 with ErrorResponse")
-    void handleHttpMessageNotReadable_ShouldReturn400WithErrorResponse() {
-        HttpMessageNotReadableException exception = mock(HttpMessageNotReadableException.class);
+    @Nested
+    @DisplayName("Generic Exception handling")
+    class GenericExceptionTests {
 
-        ResponseEntity<ErrorResponse> response = handler.handleHttpMessageNotReadable(exception);
+        @Test
+        @DisplayName("should return 500 INTERNAL_SERVER_ERROR with generic message")
+        void shouldReturn500WithGenericMessage() {
+            // Arrange
+            Exception exception = new RuntimeException("Unexpected error");
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().message()).isEqualTo("Malformed JSON request");
-        assertThat(response.getBody().stack()).isNull();
+            // Act
+            ResponseEntity<ErrorResponse> response = handler.handleGenericException(exception);
+
+            // Assert
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().message()).isEqualTo("An unexpected error occurred");
+            assertThat(response.getBody().stack()).isNull();
+        }
+
+        @Test
+        @DisplayName("should include stack trace when stack trace is enabled")
+        void shouldIncludeStackTraceWhenEnabled() {
+            // Arrange
+            ReflectionTestUtils.setField(handler, "includeStackTrace", true);
+            Exception exception = new RuntimeException("Unexpected error");
+
+            // Act
+            ResponseEntity<ErrorResponse> response = handler.handleGenericException(exception);
+
+            // Assert
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().message()).isEqualTo("An unexpected error occurred");
+            assertThat(response.getBody().stack()).isNotNull();
+            assertThat(response.getBody().stack()).contains("RuntimeException");
+        }
+
+        @Test
+        @DisplayName("should handle NullPointerException as generic exception")
+        void shouldHandleNullPointerExceptionAsGenericException() {
+            // Arrange
+            Exception exception = new NullPointerException("null reference");
+
+            // Act
+            ResponseEntity<ErrorResponse> response = handler.handleGenericException(exception);
+
+            // Assert
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().message()).isEqualTo("An unexpected error occurred");
+        }
+
+        @Test
+        @DisplayName("should handle IllegalStateException as generic exception")
+        void shouldHandleIllegalStateExceptionAsGenericException() {
+            // Arrange
+            Exception exception = new IllegalStateException("invalid state");
+
+            // Act
+            ResponseEntity<ErrorResponse> response = handler.handleGenericException(exception);
+
+            // Assert
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().message()).isEqualTo("An unexpected error occurred");
+        }
     }
 
-    @Test
-    @DisplayName("handleGenericException should return 500 with ErrorResponse")
-    void handleGenericException_ShouldReturn500WithErrorResponse() {
-        Exception exception = new RuntimeException("Unexpected error");
+    @Nested
+    @DisplayName("ErrorResponse format verification")
+    class ErrorResponseFormatTests {
 
-        ResponseEntity<ErrorResponse> response = handler.handleGenericException(exception);
+        @Test
+        @DisplayName("should return ErrorResponse with message and null stack when stack trace disabled")
+        void shouldReturnErrorResponseWithNullStackWhenDisabled() {
+            // Arrange
+            AtmNotFoundException exception = new AtmNotFoundException();
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().message()).isEqualTo("An unexpected error occurred");
-        assertThat(response.getBody().stack()).isNull();
-    }
+            // Act
+            ResponseEntity<ErrorResponse> response = handler.handleAtmNotFoundException(exception);
 
-    @Test
-    @DisplayName("handleGenericException with stack trace enabled should include stack trace")
-    void handleGenericException_WithStackTraceEnabled_ShouldIncludeStackTrace() {
-        ReflectionTestUtils.setField(handler, "includeStackTrace", true);
-        Exception exception = new RuntimeException("Unexpected error");
+            // Assert
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody()).isInstanceOf(ErrorResponse.class);
+            assertThat(response.getBody().message()).isNotNull().isNotEmpty();
+            assertThat(response.getBody().stack()).isNull();
+        }
 
-        ResponseEntity<ErrorResponse> response = handler.handleGenericException(exception);
+        @Test
+        @DisplayName("should return ErrorResponse with message and stack when stack trace enabled")
+        void shouldReturnErrorResponseWithStackWhenEnabled() {
+            // Arrange
+            ReflectionTestUtils.setField(handler, "includeStackTrace", true);
+            Exception exception = new RuntimeException("test error");
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().message()).isEqualTo("An unexpected error occurred");
-        assertThat(response.getBody().stack()).isNotNull();
-        assertThat(response.getBody().stack()).contains("RuntimeException");
-    }
+            // Act
+            ResponseEntity<ErrorResponse> response = handler.handleGenericException(exception);
 
-    @Test
-    @DisplayName("handleAtmNotFoundException with stack trace enabled should include stack trace")
-    void handleAtmNotFoundException_WithStackTraceEnabled_ShouldIncludeStackTrace() {
-        ReflectionTestUtils.setField(handler, "includeStackTrace", true);
-        AtmNotFoundException exception = new AtmNotFoundException();
-
-        ResponseEntity<ErrorResponse> response = handler.handleAtmNotFoundException(exception);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().message()).isEqualTo("No ATMs found");
-        assertThat(response.getBody().stack()).isNotNull();
-        assertThat(response.getBody().stack()).contains("AtmNotFoundException");
+            // Assert
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody()).isInstanceOf(ErrorResponse.class);
+            assertThat(response.getBody().message()).isNotNull().isNotEmpty();
+            assertThat(response.getBody().stack()).isNotNull().isNotEmpty();
+        }
     }
 }

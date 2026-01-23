@@ -86,17 +86,21 @@ public class AtmServiceImpl implements AtmService {
 
     /**
      * Checks if ATM matches the isOpenNow filter.
-     * When filter is null or false, all ATMs pass this filter.
+     * When filter is null, all ATMs pass this filter.
+     * When filter is true, only open ATMs pass.
+     * When filter is false, only closed ATMs pass.
      *
      * @param atm     the ATM entity to check
      * @param request the search request containing the filter
      * @return true if ATM matches the filter criteria
      */
     private boolean matchesOpenNowFilter(Atm atm, AtmSearchRequest request) {
-        if (request == null || !Boolean.TRUE.equals(request.isOpenNow())) {
+        if (request == null || request.isOpenNow() == null) {
             return true; // No filter applied
         }
-        return Boolean.TRUE.equals(atm.getIsOpenNow());
+        boolean wantOpen = Boolean.TRUE.equals(request.isOpenNow());
+        boolean isOpen = Boolean.TRUE.equals(atm.getIsOpenNow());
+        return wantOpen == isOpen;
     }
 
     /**
